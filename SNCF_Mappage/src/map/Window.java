@@ -1,43 +1,25 @@
 package map;
 
-import java.awt.EventQueue;
+import javax.swing.*;
+import java.awt.*;
 
-import javax.swing.JFrame;
+public class Window extends JFrame {
+    public Window() {
+        setTitle("Application Principale");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setSize(800, 600); // Taille de la fenêtre principale
+        setLocationRelativeTo(null); // Centrer la fenêtre sur l'écran
+        
+        // Création d'un onglet pour le menu
+        MenuPanel menuPanel = new MenuPanel();
+        JTabbedPane tabbedPane = new JTabbedPane();
+        tabbedPane.addTab("Menu", menuPanel);
 
-public class Window {
-
-	private JFrame frame;
-
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					Window window = new Window();
-					window.frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
-
-	/**
-	 * Create the application.
-	 */
-	public Window() {
-		initialize();
-	}
-
-	/**
-	 * Initialize the contents of the frame.
-	 */
-	private void initialize() {
-		frame = new JFrame();
-		frame.setBounds(100, 100, 450, 300);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-	}
-
+        // Création d'un onglet pour le choix du nombre de baies
+        NbChoixBaiesPanel nbchoixBaiesPanel = new NbChoixBaiesPanel();
+        tabbedPane.addTab("Choix du Nombre de Baies", nbchoixBaiesPanel);
+        
+        // Ajout des onglets à la fenêtre principale
+        add(tabbedPane);
+    }
 }
