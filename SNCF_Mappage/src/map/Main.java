@@ -2,6 +2,10 @@ package map;
 import map.Login.LoginSuccessListener;
 import javax.swing.*;
 
+
+
+
+
 public class Main {
 
     public static void main(String[] args) {
@@ -12,7 +16,13 @@ public class Main {
                 loginWindow.addLoginSuccessListener(new LoginSuccessListener() {
                     @Override
                     public void onLoginSuccess() {
-                        // Une fois que l'utilisateur est connecté, lancer l'application principale
+                        // Une fois que l'utilisateur est connecté, fermer la fenêtre de connexion
+                        JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(loginWindow);
+                        if (frame != null) {
+                            frame.dispose();
+                        }
+
+                        // Lancer l'application principale
                         Window window = new Window();
                         window.launch();
                     }
@@ -27,3 +37,4 @@ public class Main {
         });
     }
 }
+

@@ -49,8 +49,13 @@ public class Window {
         JMenuItem menuItemNouveauPlan = new JMenuItem("Nouveau plan");
         menuItemNouveauPlan.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Ajoutez ici le code à exécuter lorsque l'option "Nouveau plan" est sélectionnée
-                JOptionPane.showMessageDialog(frame, "Option Nouveau plan sélectionnée");
+                // Afficher la fenêtre NbBaies lorsque l'option "Nouveau plan" est sélectionnée
+                JFrame nbBaiesFrame = new JFrame("Nombre de Baies");
+                nbBaiesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                nbBaiesFrame.getContentPane().add(new NbBaies());
+                nbBaiesFrame.pack();
+                nbBaiesFrame.setLocationRelativeTo(null);
+                nbBaiesFrame.setVisible(true);
             }
         });
         menuItemNouveauPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Event.CTRL_MASK));
