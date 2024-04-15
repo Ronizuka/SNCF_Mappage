@@ -9,7 +9,7 @@ import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
+import javax.swing.KeyStroke;
 
 public class Window {
 
@@ -53,6 +53,7 @@ public class Window {
                 JOptionPane.showMessageDialog(frame, "Option Nouveau plan sélectionnée");
             }
         });
+        menuItemNouveauPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemNouveauPlan);
 
         // Option "Importer plan"
@@ -63,7 +64,19 @@ public class Window {
                 JOptionPane.showMessageDialog(frame, "Option Importer plan sélectionnée");
             }
         });
+        menuItemImporterPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemImporterPlan);
+
+        // Option "Enregistrer"
+        JMenuItem menuItemEnregistrer = new JMenuItem("Enregistrer");
+        menuItemEnregistrer.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Ajoutez ici le code à exécuter lorsque l'option "Enregistrer" est sélectionnée
+                JOptionPane.showMessageDialog(frame, "Option Enregistrer sélectionnée");
+            }
+        });
+        menuItemEnregistrer.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Event.CTRL_MASK));
+        menuFichier.add(menuItemEnregistrer);
 
         // Option "Exporter plan"
         JMenuItem menuItemExporterPlan = new JMenuItem("Exporter plan");
@@ -86,7 +99,32 @@ public class Window {
                 System.exit(0);
             }
         });
+        menuItemQuitter.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_Q, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemQuitter);
+
+        // Menu "Connexion"
+        JMenu menuConnexion = new JMenu("Connexion");
+        menuBar.add(menuConnexion);
+
+        // Option "Se connecter avec un autre compte"
+        JMenuItem menuItemSeConnecter = new JMenuItem("Se connecter avec un autre compte");
+        menuItemSeConnecter.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Ajoutez ici le code à exécuter lorsque l'option "Se connecter avec un autre compte" est sélectionnée
+                JOptionPane.showMessageDialog(frame, "Option Se connecter avec un autre compte sélectionnée");
+            }
+        });
+        menuConnexion.add(menuItemSeConnecter);
+
+        // Option "Déconnexion"
+        JMenuItem menuItemDeconnexion = new JMenuItem("Déconnexion");
+        menuItemDeconnexion.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // Ajoutez ici le code à exécuter lorsque l'option "Déconnexion" est sélectionnée
+                JOptionPane.showMessageDialog(frame, "Option Déconnexion sélectionnée");
+            }
+        });
+        menuConnexion.add(menuItemDeconnexion);
 
         // Récupère le cadre de la fenêtre et centre le titre
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
