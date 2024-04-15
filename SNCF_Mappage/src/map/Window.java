@@ -10,12 +10,15 @@ import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.KeyStroke;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
 
 public class Window {
 
     private JFrame frame;
 
-    /**
+    /*
      * Create the application.
      */
     public Window() {
@@ -133,7 +136,37 @@ public class Window {
 
         // Récupère le cadre de la fenêtre et centre le titre
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
+        
+        JPanel sidePanel = new JPanel(new GridBagLayout()); // Utilisation d'un GridBagLayout pour le centrage vertical
+        sidePanel.setPreferredSize(new Dimension(100, frame.getHeight())); // Définir la largeur de la barre de tâches
+        sidePanel.setBackground(new Color(34, 34, 34)); // Gris foncé
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.fill = GridBagConstraints.VERTICAL; // Remplir la barre de tâches verticalement
+        gbc.insets = new Insets(5, 5, 5, 5); // Ajouter des marges
+
+        // Ajout des boutons à la barre de tâches
+        for (int i = 0; i < 6; i++) {
+            gbc.gridy = i; // Positionner chaque bouton sur une nouvelle ligne
+            JButton button = new JButton(Integer.toString(i + 1)); // Texte avec les chiffres de 1 à 6
+            button.setFocusPainted(false); // Désactiver la mise en évidence du focus
+            button.setBackground(Color.WHITE); // Couleur de fond blanc
+            button.setPreferredSize(new Dimension(40, 40)); // Définir la taille des boutons
+            sidePanel.add(button, gbc);
+        }
+
+        // Ajout de la barre de tâches verticale à gauche
+        frame.add(sidePanel, BorderLayout.WEST);
+       
+        DrawingArea drawingArea = new DrawingArea();
+        JScrollPane scrollPane = new JScrollPane(drawingArea); 
+        frame.add(scrollPane, BorderLayout.CENTER); 
+        
+
     }
+
+    
 
     /**
      * Launch the application.
