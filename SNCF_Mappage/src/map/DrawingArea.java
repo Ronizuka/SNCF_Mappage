@@ -4,9 +4,10 @@ import javax.swing.*;
 import java.awt.event.*;
 
 class DrawingArea extends JPanel {
-    private int zoomFactor = 1; // Facteur de zoom initial
+    private double zoomFactor = 1.0; // Facteur de zoom initial
     private int xOffset = 0; // Décalage horizontal initial
     private int yOffset = 0; // Décalage vertical initial
+    private Point dragStart; // Point de départ du drag
 
     public DrawingArea() {
         setBackground(Color.WHITE);
@@ -28,6 +29,44 @@ class DrawingArea extends JPanel {
                 }
             }
         });
+
+        // Ajouter un écouteur d'événements de souris pour détecter le début du drag
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent e) {
+                dragStart = e.getPoint();
+            }
+        });
+
+        // Ajouter un écouteur d'événements de souris pour détecter le déplacement de la souris pendant le drag
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (dragStart != null) {
+                    // Calculer le déplacement par rapport au point de départ du drag
+                    int deltaX = dragStart.x - e.getX(); 
+                    int deltaY = dragStart.y - e.getY(); 
+
+                    // Mettre à jour les décalages
+                    xOffset += deltaX;
+                    yOffset += deltaY;
+
+                    // Mettre à jour le point de départ pour le prochain déplacement
+                    dragStart = e.getPoint();
+
+                    // Redessiner la zone de dessin avec les nouveaux décalages
+                    repaint();
+                }
+            }
+        });
+
+        // Ajouter un écouteur d'événements de souris pour détecter la fin du drag
+        addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                dragStart = null; // Réinitialiser le point de départ du drag
+            }
+        });
     }
 
     @Override
@@ -46,38 +85,38 @@ class DrawingArea extends JPanel {
     }
 
     // Méthode pour changer le facteur de zoom
-    public void setZoom(int zoomFactor) {
+    public void setZoom(double zoomFactor) {
         this.zoomFactor = zoomFactor;
         repaint(); // Redessiner la zone de dessin avec le nouveau facteur de zoom
     }
 
     // Méthode pour effectuer un zoom avant centré sur la position de la souris
     public void zoomIn(Point mousePos) {
-        int oldZoomFactor = zoomFactor;
-        zoomFactor++;
+        double oldZoomFactor = zoomFactor;
+        zoomFactor *= 1.1; // Augmente le zoom de 10%
         adjustOffsets(mousePos, oldZoomFactor);
         repaint();
     }
 
     // Méthode pour effectuer un zoom arrière centré sur la position de la souris
     public void zoomOut(Point mousePos) {
-        if (zoomFactor > 1) {
-            int oldZoomFactor = zoomFactor;
-            zoomFactor--;
+        if (zoomFactor > 0.1) { // Limite le zoom arrière
+            double oldZoomFactor = zoomFactor;
+            zoomFactor /= 1.1; // Réduit le zoom de 10%
             adjustOffsets(mousePos, oldZoomFactor);
             repaint();
         }
     }
 
     // Méthode pour ajuster les décalages en fonction du nouveau facteur de zoom
-    private void adjustOffsets(Point mousePos, int oldZoomFactor) {
+    private void adjustOffsets(Point mousePos, double oldZoomFactor) {
         // Calculer le décalage nécessaire pour maintenir la position de la souris inchangée
-        int deltaX = (int) ((mousePos.x - xOffset) * (zoomFactor - oldZoomFactor));
-        int deltaY = (int) ((mousePos.y - yOffset) * (zoomFactor - oldZoomFactor));
+        int deltaX = (int) ((mousePos.x - xOffset) * (zoomFactor / oldZoomFactor)) - mousePos.x;
+        int deltaY = (int) ((mousePos.y - yOffset) * (zoomFactor / oldZoomFactor)) - mousePos.y;
         
         // Appliquer le décalage
-        xOffset -= deltaX;
-        yOffset -= deltaY;
+        xOffset += deltaX;
+        yOffset += deltaY;
 
         // Limiter les décalages pour éviter les valeurs négatives
         xOffset = Math.max(0, xOffset);
