@@ -22,7 +22,7 @@ public class Login extends JPanel {
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.LINE_END;
         gbc.insets = new Insets(5, 5, 5, 5);
-        JLabel usernameLabel = new JLabel("Votre identifiant : ");
+        JLabel usernameLabel = new JLabel("Votre Identifiant : ");
         loginPanel.add(usernameLabel, gbc);
         gbc.gridy++;
         JLabel passwordLabel = new JLabel("Mot de passe : ");
