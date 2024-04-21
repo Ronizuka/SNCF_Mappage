@@ -115,7 +115,7 @@ public class Window {
 
             // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 0) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\puce-electronique.png"); // Charger l'image
+                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\fleche_recule.png"); // Charger l'image
                 Image img = icon.getImage();
                 Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
                 ImageIcon newIcon = new ImageIcon(newImg);
@@ -129,7 +129,28 @@ public class Window {
                 button.setIcon(newIcon);
             }
             if (i == 2) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\fleche_recule.png"); // Charger l'image
+                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\souris.png"); // Charger l'image
+                Image img = icon.getImage();
+                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                ImageIcon newIcon = new ImageIcon(newImg);
+                button.setIcon(newIcon);
+            }
+            if (i == 3) {
+                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\puce-electronique.png"); // Charger l'image
+                Image img = icon.getImage();
+                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                ImageIcon newIcon = new ImageIcon(newImg);
+                button.setIcon(newIcon);
+            }
+            if (i == 4) {
+                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\cable.png"); // Charger l'image
+                Image img = icon.getImage();
+                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                ImageIcon newIcon = new ImageIcon(newImg);
+                button.setIcon(newIcon);
+            }
+            if (i == 5) {
+                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\croix.png"); // Charger l'image
                 Image img = icon.getImage();
                 Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
                 ImageIcon newIcon = new ImageIcon(newImg);
