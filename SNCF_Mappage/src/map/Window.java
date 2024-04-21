@@ -3,6 +3,11 @@ package map;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import map.Login.LoginSuccessListener;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 
 public class Window {
 
@@ -92,7 +97,7 @@ public class Window {
         // Élément de menu "Déconnexion"
         JMenuItem menuItemDeconnexion = new JMenuItem("Déconnexion");
         menuItemDeconnexion.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Déconnexion sélectionnée");
+            disconnect();
         });
         menuConnexion.add(menuItemDeconnexion);
 
@@ -114,48 +119,82 @@ public class Window {
             JButton button = new JButton();
 
             // Charger l'image et l'affecter comme icône du premier bouton uniquement
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 0) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\fleche_recule.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_recule.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 1) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\fleche_avance.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_avance.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 2) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\souris.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/souris.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 3) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\puce-electronique.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/puce-electronique.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 4) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\cable.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/cable.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+         // Charger l'image et l'affecter comme icône du premier bouton uniquement
             if (i == 5) {
-                ImageIcon icon = new ImageIcon("C:\\Users\\33767\\Documents\\GitHub\\SNCF_Mappage\\SNCF_Mappage\\Icon\\croix.png"); // Charger l'image
-                Image img = icon.getImage();
-                Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
-                ImageIcon newIcon = new ImageIcon(newImg);
-                button.setIcon(newIcon);
+                try {
+                    URL imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/croix.png?raw=true");
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH); // Redimensionner l'image
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             }
+
 
             button.setFocusPainted(false);
             button.setPreferredSize(new Dimension(50, 50));
@@ -170,6 +209,36 @@ public class Window {
         DrawingArea drawingArea = new DrawingArea();
         JScrollPane scrollPane = new JScrollPane(drawingArea);
         frame.add(scrollPane, BorderLayout.CENTER);
+    }
+    
+ // Méthode de déconnexion
+    private void disconnect() {
+        // Fermer la fenêtre principale
+        frame.dispose();
+        // Relancer la fenêtre de connexion
+        Login loginWindow = new Login();
+        loginWindow.addLoginSuccessListener(new LoginSuccessListener() {
+            @Override
+            public void onLoginSuccess() {
+                // Une fois que l'utilisateur est connecté, fermer la fenêtre de connexion
+                JFrame frame = new JFrame("SNCF Mappage - Connexion");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.getContentPane().add(loginWindow);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+
+                // Lancer l'application principale
+                Window window = new Window();
+                window.launch();
+            }
+        });
+        JFrame frame = new JFrame("SNCF Mappage - Connexion");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(loginWindow);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 
     public void launch() {
