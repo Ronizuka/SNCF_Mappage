@@ -1,10 +1,7 @@
 package map;
 import map.Login.LoginSuccessListener;
 import javax.swing.*;
-
-
-
-
+import java.sql.*;
 
 public class Main {
 
@@ -33,8 +30,21 @@ public class Main {
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
+                
+                // Connexion à la base de données
+                try {
+                    Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
+                    if (connection != null) {
+                        System.out.println("Connexion à la base de données établie !");
+                        // Vous pouvez faire d'autres opérations avec la connexion ici si nécessaire
+                    } else {
+                        System.out.println("Impossible de se connecter à la base de données.");
+                    }
+                } catch (SQLException e) {
+                    System.out.println("Erreur : Échec de la connexion à la base de données !");
+                    e.printStackTrace();
+                }
             }
         });
     }
 }
-

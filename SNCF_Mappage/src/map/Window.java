@@ -1,7 +1,11 @@
 package map;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Window {
 
@@ -83,37 +87,74 @@ public class Window {
         menuConnexion.add(menuItemDeconnexion);
 
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
-        
-        JPanel sidePanel = new JPanel(new GridBagLayout()); 
-        sidePanel.setPreferredSize(new Dimension(100, frame.getHeight())); 
-        sidePanel.setBackground(new Color(34, 34, 34)); 
-        
+
+        JPanel sidePanel = new JPanel(new GridBagLayout());
+        sidePanel.setPreferredSize(new Dimension(100, frame.getHeight()));
+        sidePanel.setBackground(new Color(34, 34, 34));
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
-        gbc.fill = GridBagConstraints.VERTICAL; 
-        gbc.insets = new Insets(5, 5, 5, 5); 
+        gbc.fill = GridBagConstraints.VERTICAL;
+        gbc.insets = new Insets(5, 5, 5, 5);
 
         for (int i = 0; i < 6; i++) {
-            gbc.gridy = i; 
+            final int index = i; // Déclarer une variable finale pour capturer la valeur de i
+            gbc.gridy = i;
             JButton button = new JButton();
 
-            // Charger l'image et l'affecter comme icône du premier bouton uniquement
-            if (i == 0) {
-                ImageIcon icon = new ImageIcon("puce-electronique.png"); // Remplacez "puce-electronique.png" par le chemin de votre image
-                button.setIcon(icon);
-            }
+            button.addActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (index == 3) {
+                        showDropdown();
+                    }
+                }
+            });
 
-            button.setFocusPainted(false); 
-            button.setPreferredSize(new Dimension(50, 50)); 
+            button.setFocusPainted(false);
+            button.setPreferredSize(new Dimension(60, 60));
 
             sidePanel.add(button, gbc);
         }
 
+
         frame.add(sidePanel, BorderLayout.WEST);
-       
+
         DrawingArea drawingArea = new DrawingArea();
-        JScrollPane scrollPane = new JScrollPane(drawingArea); 
-        frame.add(scrollPane, BorderLayout.CENTER); 
+        JScrollPane scrollPane = new JScrollPane(drawingArea);
+        frame.add(scrollPane, BorderLayout.CENTER);
+    }
+
+    private void showDropdown() {
+        // Créer une liste déroulante pour afficher les noms d'équipement depuis la base de données
+        JComboBox<String> dropdown = new JComboBox<>();
+        try {
+            // Établir la connexion à la base de données
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
+            if (connection != null) {
+                // Exécuter la requête SQL pour récupérer les noms d'équipement depuis la table 'equipements'
+                Statement statement = connection.createStatement();
+                ResultSet resultSet = statement.executeQuery("SELECT nomEquipt FROM equipements");
+                // Parcourir les résultats et ajouter chaque nom d'équipement à la liste déroulante
+                List<String> equipementNames = new ArrayList<>();
+                while (resultSet.next()) {
+                    equipementNames.add(resultSet.getString("nomEquipt"));
+                }
+                resultSet.close();
+                statement.close();
+                connection.close();
+
+                // Ajouter les noms d'équipement à la liste déroulante
+                for (String name : equipementNames) {
+                    dropdown.addItem(name);
+                }
+
+                // Afficher la liste déroulante dans une boîte de dialogue
+                JOptionPane.showMessageDialog(frame, dropdown, "Sélectionner un équipement", JOptionPane.PLAIN_MESSAGE);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
     }
 
     public void launch() {
