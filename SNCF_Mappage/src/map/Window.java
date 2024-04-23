@@ -10,6 +10,12 @@ import java.util.List;
 public class Window {
 
     private JFrame frame;
+    private DrawingArea drawingArea;
+    private String selectedEquipment;
+    private Point selectedEquipmentPosition;
+    private int selectedEquipmentWidth;
+    private int selectedEquipmentHeight;
+    
 
     public Window() {
         initialize();
@@ -98,7 +104,7 @@ public class Window {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         for (int i = 0; i < 6; i++) {
-            final int index = i; // Déclarer une variable finale pour capturer la valeur de i
+            final int index = i;
             gbc.gridy = i;
             JButton button = new JButton();
 
@@ -117,25 +123,42 @@ public class Window {
             sidePanel.add(button, gbc);
         }
 
-
         frame.add(sidePanel, BorderLayout.WEST);
 
-        DrawingArea drawingArea = new DrawingArea();
+        drawingArea = new DrawingArea();
+        drawingArea.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (selectedEquipment != null) {
+                    selectedEquipmentPosition = e.getPoint();
+                    drawingArea.placeSelectedComponent(selectedEquipment, selectedEquipmentPosition, selectedEquipmentWidth, selectedEquipmentHeight);
+                    selectedEquipment = null;
+                    selectedEquipmentPosition = null;
+                    selectedEquipmentWidth = 0;
+                    selectedEquipmentHeight = 0;
+                }
+            }
+        });
+        drawingArea.addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                if (selectedEquipment != null) {
+                    selectedEquipmentPosition = e.getPoint();
+                    drawingArea.repaint();
+                }
+            }
+        });
         JScrollPane scrollPane = new JScrollPane(drawingArea);
         frame.add(scrollPane, BorderLayout.CENTER);
     }
 
     private void showDropdown() {
-        // Créer une liste déroulante pour afficher les noms d'équipement depuis la base de données
         JComboBox<String> dropdown = new JComboBox<>();
         try {
-            // Établir la connexion à la base de données
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
             if (connection != null) {
-                // Exécuter la requête SQL pour récupérer les noms d'équipement depuis la table 'equipements'
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT nomEquipt FROM equipements");
-                // Parcourir les résultats et ajouter chaque nom d'équipement à la liste déroulante
+                ResultSet resultSet = statement.executeQuery("SELECT nomEquipt, longueur, hauteur FROM equipements");
                 List<String> equipementNames = new ArrayList<>();
                 while (resultSet.next()) {
                     equipementNames.add(resultSet.getString("nomEquipt"));
@@ -144,18 +167,35 @@ public class Window {
                 statement.close();
                 connection.close();
 
-                // Ajouter les noms d'équipement à la liste déroulante
                 for (String name : equipementNames) {
                     dropdown.addItem(name);
                 }
 
-                // Afficher la liste déroulante dans une boîte de dialogue
-                JOptionPane.showMessageDialog(frame, dropdown, "Sélectionner un équipement", JOptionPane.PLAIN_MESSAGE);
+                int result = JOptionPane.showConfirmDialog(frame, dropdown, "Sélectionner un équipement", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
+                if (result == JOptionPane.OK_OPTION) {
+                    selectedEquipment = (String) dropdown.getSelectedItem();
+                    System.out.println("Equipement sélectionné : " + selectedEquipment); // Afficher le nom de l'équipement sélectionné
+                    connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
+                    statement = connection.createStatement();
+                    resultSet = statement.executeQuery("SELECT longueur, hauteur FROM equipements WHERE nomEquipt = '" + selectedEquipment + "'");
+                    if (resultSet.next()) {
+                        int width = resultSet.getInt("longueur");
+                        int height = resultSet.getInt("hauteur");
+                        System.out.println("Longueur de l'équipement : " + width); // Afficher la longueur de l'équipement
+                        System.out.println("Hauteur de l'équipement : " + height); // Afficher la hauteur de l'équipement
+                        drawingArea.placeSelectedComponent(selectedEquipment, selectedEquipmentPosition, width, height);
+                    }
+                    resultSet.close();
+                    statement.close();
+                    connection.close();
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();
         }
     }
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   
 
     public void launch() {
         EventQueue.invokeLater(() -> {
