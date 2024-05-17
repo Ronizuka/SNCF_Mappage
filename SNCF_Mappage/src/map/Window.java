@@ -6,6 +6,10 @@ import java.awt.event.*;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.IOException;
+import java.net.URL;
 
 public class Window {
 
@@ -66,7 +70,6 @@ public class Window {
             JOptionPane.showMessageDialog(frame, "Option Exporter plan sélectionnée");
         });
         menuFichier.add(menuItemExporterPlan);
-
         menuFichier.addSeparator();
 
         JMenuItem menuItemQuitter = new JMenuItem("Quitter");
@@ -87,7 +90,7 @@ public class Window {
 
         JMenuItem menuItemDeconnexion = new JMenuItem("Déconnexion");
         menuItemDeconnexion.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Déconnexion sélectionnée");
+            disconnect();
         });
         menuConnexion.add(menuItemDeconnexion);
 
@@ -103,10 +106,46 @@ public class Window {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         for (int i = 0; i < 6; i++) {
-            final int index = i;
             gbc.gridy = i;
             JButton button = new JButton();
 
+            // Charger les images et les affecter comme icônes des boutons
+            try {
+                URL imageUrl = null;
+                switch (i) {
+                    case 0:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_recule.png?raw=true");
+                        break;
+                    case 1:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_avance.png?raw=true");
+                        break;
+                    case 2:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/souris.png?raw=true");
+                        break;
+                    case 3:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/puce-electronique.png?raw=true");
+                        break;
+                    case 4:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/cable.png?raw=true");
+                        break;
+                    case 5:
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/croix.png?raw=true");
+                        break;
+                }
+                if (imageUrl != null) {
+                    BufferedImage img = ImageIO.read(imageUrl);
+                    Image newImg = img.getScaledInstance(50, 50, Image.SCALE_SMOOTH);
+                    ImageIcon newIcon = new ImageIcon(newImg);
+                    button.setIcon(newIcon);
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            button.setFocusPainted(false);
+            button.setPreferredSize(new Dimension(60, 60));
+
+            final int index = i;
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
@@ -115,9 +154,6 @@ public class Window {
                     }
                 }
             });
-
-            button.setFocusPainted(false);
-            button.setPreferredSize(new Dimension(60, 60));
 
             sidePanel.add(button, gbc);
         }
@@ -173,15 +209,15 @@ public class Window {
                 int result = JOptionPane.showConfirmDialog(frame, dropdown, "Sélectionner un équipement", JOptionPane.OK_CANCEL_OPTION, JOptionPane.PLAIN_MESSAGE);
                 if (result == JOptionPane.OK_OPTION) {
                     selectedEquipment = (String) dropdown.getSelectedItem();
-                    System.out.println("Equipement sélectionné : " + selectedEquipment); // Afficher le nom de l'équipement sélectionné
+                    System.out.println("Equipement sélectionné : " + selectedEquipment);
                     connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
                     statement = connection.createStatement();
                     resultSet = statement.executeQuery("SELECT longueur, hauteur FROM equipements WHERE nomEquipt = '" + selectedEquipment + "'");
                     if (resultSet.next()) {
                         selectedEquipmentWidth = resultSet.getInt("longueur");
                         selectedEquipmentHeight = resultSet.getInt("hauteur");
-                        System.out.println("Longueur de l'équipement : " + selectedEquipmentWidth); // Afficher la longueur de l'équipement
-                        System.out.println("Hauteur de l'équipement : " + selectedEquipmentHeight); // Afficher la hauteur de l'équipement
+                        System.out.println("Longueur de l'équipement : " + selectedEquipmentWidth);
+                        System.out.println("Hauteur de l'équipement : " + selectedEquipmentHeight);
                         drawingArea.selectComponent(selectedEquipment, selectedEquipmentWidth, selectedEquipmentHeight);
                     }
                     resultSet.close();
@@ -195,7 +231,8 @@ public class Window {
     }
 
     private Point adjustPoint(Point p) {
-        return new Point((int) (p.x / drawingArea.getScale()), (int) (p.y / drawingArea.getScale()));
+        return new Point((int) ((p.x - drawingArea.getOffsetX()) / drawingArea.getScale()), 
+                         (int) ((p.y - drawingArea.getOffsetY()) / drawingArea.getScale()));
     }
 
     public void launch() {
@@ -206,5 +243,34 @@ public class Window {
                 e.printStackTrace();
             }
         });
+    }
+
+    private void disconnect() {
+        // Fermer la fenêtre principale
+        frame.dispose();
+        // Relancer la fenêtre de connexion
+        Login loginWindow = new Login();
+        loginWindow.addLoginSuccessListener(new Login.LoginSuccessListener() {
+            @Override
+            public void onLoginSuccess() {
+                // Une fois que l'utilisateur est connecté, fermer la fenêtre de connexion
+                JFrame frame = new JFrame("SNCF Mappage - Connexion");
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                frame.getContentPane().add(loginWindow);
+                frame.pack();
+                frame.setLocationRelativeTo(null);
+                frame.setVisible(true);
+
+                // Lancer l'application principale
+                Window window = new Window();
+                window.launch();
+            }
+        });
+        JFrame frame = new JFrame("SNCF Mappage - Connexion");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.getContentPane().add(loginWindow);
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
 }
