@@ -12,17 +12,13 @@ class DrawingArea extends JPanel {
     private int selectedComponentHeight;
     private List<List<Object>> equipments;
     private double scale = 1.0;
-    private Dimension screenSize;
     private double offsetX = 0;
     private double offsetY = 0;
+    private Point dragStartPoint = null;
 
     public DrawingArea() {
         setBackground(Color.WHITE);
         equipments = new ArrayList<>();
-
-        // Obtenez la taille de l'écran
-        screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setPreferredSize(screenSize); // Utilisez la taille de l'écran comme taille préférée initiale
 
         addMouseListener(new MouseAdapter() {
             @Override
@@ -35,6 +31,29 @@ class DrawingArea extends JPanel {
                     selectedComponentPosition = null;
                     selectedComponentWidth = 0;
                     selectedComponentHeight = 0;
+                }
+            }
+
+            @Override
+            public void mousePressed(MouseEvent e) {
+                dragStartPoint = e.getPoint();
+            }
+
+            @Override
+            public void mouseReleased(MouseEvent e) {
+                dragStartPoint = null;
+            }
+        });
+
+        addMouseMotionListener(new MouseAdapter() {
+            @Override
+            public void mouseDragged(MouseEvent e) {
+                if (dragStartPoint != null) {
+                    Point dragEndPoint = e.getPoint();
+                    offsetX += dragEndPoint.x - dragStartPoint.x;
+                    offsetY += dragEndPoint.y - dragStartPoint.y;
+                    dragStartPoint = dragEndPoint;
+                    repaint();
                 }
             }
         });
@@ -51,10 +70,10 @@ class DrawingArea extends JPanel {
                 }
 
                 // Adjust offset to keep mouse position consistent
-                offsetX = mousePoint.x - scale * (mousePoint.x - offsetX) / prevScale;
-                offsetY = mousePoint.y - scale * (mousePoint.y - offsetY) / prevScale;
+                offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
+                offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
 
-                revalidate(); // Réajuste la taille de la zone de dessin
+                revalidate();
                 repaint();
             }
         });
@@ -79,18 +98,32 @@ class DrawingArea extends JPanel {
         selectedComponent = componentName;
         selectedComponentWidth = width;
         selectedComponentHeight = height;
+        System.out.println("Component selected: " + componentName + " with width=" + width + " and height=" + height);
     }
 
     public void addEquipment(String componentName, Point position, int width, int height) {
         if (position != null) {
+            Point adjustedPosition = adjustPoint(position);
+            // Vérifiez que l'équipement n'existe pas déjà à cette position ajustée
+            for (List<Object> equipment : equipments) {
+                String existingComponentName = (String) equipment.get(0);
+                Point existingPosition = (Point) equipment.get(1);
+                if (existingComponentName.equals(componentName) && existingPosition.equals(adjustedPosition)) {
+                    System.out.println("Equipment already exists at this position, not adding again.");
+                    return;
+                }
+            }
+
             List<Object> newEquipment = new ArrayList<>();
             newEquipment.add(componentName);
-            newEquipment.add(position);
+            newEquipment.add(new Point(adjustedPosition)); // Ajouter la position ajustée
             newEquipment.add(width);
             newEquipment.add(height);
             equipments.add(newEquipment);
-            System.out.println("Added equipment: " + componentName + " at " + position + " with width=" + width + ", height=" + height);
+            System.out.println("Added equipment: " + componentName + " at " + adjustedPosition + " with width=" + width + ", height=" + height);
             repaint();
+        } else {
+            System.out.println("Position is null, not adding equipment.");
         }
     }
 
@@ -101,11 +134,14 @@ class DrawingArea extends JPanel {
         int height = (int) equipment.get(3);
 
         if (position != null) {
+            Point adjustedPosition = new Point((int) (position.x * scale + offsetX), (int) (position.y * scale + offsetY));
             if (width == 0 && height == 0) {
-                drawSquare(position, componentName, g2d);
+                drawSquare(adjustedPosition, componentName, g2d);
             } else {
-                drawRectangle(position, width, height, componentName, g2d);
+                drawRectangle(adjustedPosition, width, height, componentName, g2d);
             }
+        } else {
+            System.out.println("Position is null while drawing equipment.");
         }
     }
 
@@ -139,7 +175,7 @@ class DrawingArea extends JPanel {
 
     private Point adjustPoint(Point p) {
         Point adjusted = new Point((int) ((p.x - offsetX) / scale), (int) ((p.y - offsetY) / scale));
-        System.out.println("Adjusted point: " + adjusted);
+        System.out.println("Original point: " + p + ", Adjusted point: " + adjusted);
         return adjusted;
     }
 
