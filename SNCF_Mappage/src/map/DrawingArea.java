@@ -182,4 +182,12 @@ class DrawingArea extends JPanel {
     public double getScale() {
         return scale;
     }
+
+    public double getOffsetX() {
+        return offsetX;
+    }
+
+    public double getOffsetY() {
+        return offsetY;
+    }
 }
