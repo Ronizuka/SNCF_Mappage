@@ -19,6 +19,8 @@ public class Window {
     private Point selectedEquipmentPosition;
     private int selectedEquipmentWidth;
     private int selectedEquipmentHeight;
+    private List<JMenuItem> disabledMenuItems;
+    private List<JButton> disabledButtons;
 
     public Window() {
         initialize();
@@ -41,9 +43,10 @@ public class Window {
 
         JMenuItem menuItemNouveauPlan = new JMenuItem("Nouveau plan");
         menuItemNouveauPlan.addActionListener(e -> {
+            enableMenuItemsAndButtons();
             JFrame nbBaiesFrame = new JFrame("Nombre de Baies");
             nbBaiesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            nbBaiesFrame.getContentPane().add(new NbBaies());
+            nbBaiesFrame.getContentPane().add(new NbBaies(this));
             nbBaiesFrame.pack();
             nbBaiesFrame.setLocationRelativeTo(null);
             nbBaiesFrame.setVisible(true);
@@ -53,6 +56,7 @@ public class Window {
 
         JMenuItem menuItemImporterPlan = new JMenuItem("Importer plan");
         menuItemImporterPlan.addActionListener(e -> {
+            enableMenuItemsAndButtons();
             JOptionPane.showMessageDialog(frame, "Option Importer plan sélectionnée");
         });
         menuItemImporterPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.Event.CTRL_MASK));
@@ -70,6 +74,7 @@ public class Window {
             JOptionPane.showMessageDialog(frame, "Option Exporter plan sélectionnée");
         });
         menuFichier.add(menuItemExporterPlan);
+
         menuFichier.addSeparator();
 
         JMenuItem menuItemQuitter = new JMenuItem("Quitter");
@@ -105,6 +110,7 @@ public class Window {
         gbc.fill = GridBagConstraints.VERTICAL;
         gbc.insets = new Insets(5, 5, 5, 5);
 
+        disabledButtons = new ArrayList<>();
         for (int i = 0; i < 6; i++) {
             gbc.gridy = i;
             JButton button = new JButton();
@@ -156,6 +162,8 @@ public class Window {
             });
 
             sidePanel.add(button, gbc);
+            button.setEnabled(false); // Désactiver les boutons
+            disabledButtons.add(button);
         }
 
         frame.add(sidePanel, BorderLayout.WEST);
@@ -166,7 +174,12 @@ public class Window {
             public void mouseClicked(MouseEvent e) {
                 if (selectedEquipment != null) {
                     Point clickedPoint = adjustPoint(e.getPoint());
-                    drawingArea.addEquipment(selectedEquipment, clickedPoint, selectedEquipmentWidth, selectedEquipmentHeight);
+                    for (DrawingArea.Baie baie : drawingArea.getBaies()) {
+                        if (baie.contains(clickedPoint)) {
+                            baie.addEquipment(selectedEquipment, clickedPoint, selectedEquipmentWidth, selectedEquipmentHeight);
+                            break;
+                        }
+                    }
                     selectedEquipment = null;
                     selectedEquipmentPosition = null;
                     selectedEquipmentWidth = 0;
@@ -185,6 +198,33 @@ public class Window {
         });
         JScrollPane scrollPane = new JScrollPane(drawingArea);
         frame.add(scrollPane, BorderLayout.CENTER);
+
+        disabledMenuItems = new ArrayList<>();
+        for (Component menuComponent : menuBar.getComponents()) {
+            if (menuComponent instanceof JMenu) {
+                JMenu menu = (JMenu) menuComponent;
+                for (Component menuItemComponent : menu.getMenuComponents()) {
+                    if (menuItemComponent instanceof JMenuItem && menuItemComponent != menuItemNouveauPlan && menuItemComponent != menuItemImporterPlan && menuItemComponent != menuItemQuitter) {
+                        JMenuItem menuItem = (JMenuItem) menuItemComponent;
+                        menuItem.setEnabled(false); // Désactiver les éléments de menu
+                        disabledMenuItems.add(menuItem);
+                    }
+                }
+            }
+        }
+    }
+
+    public void addBaies(int nombreBaies) {
+        drawingArea.addBaies(nombreBaies);
+    }
+
+    private void enableMenuItemsAndButtons() {
+        for (JMenuItem menuItem : disabledMenuItems) {
+            menuItem.setEnabled(true);
+        }
+        for (JButton button : disabledButtons) {
+            button.setEnabled(true);
+        }
     }
 
     private void showDropdown() {
@@ -261,9 +301,7 @@ public class Window {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
 
-                // Lancer l'application principale
-                Window window = new Window();
-                window.launch();
+                
             }
         });
         JFrame frame = new JFrame("SNCF Mappage - Connexion");

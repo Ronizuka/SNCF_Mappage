@@ -6,13 +6,13 @@ import java.awt.event.*;
 
 public class NbBaies extends JPanel {
     private JSpinner spinnerNombreBaies;
-    private JSpinner spinnerNombreChassis;
     private JButton validerButton;
+    private Window window;
 
-    public NbBaies() {
+    public NbBaies(Window window) {
+        this.window = window;
         setLayout(new BorderLayout());
 
-        // Création du panel pour les champs de sélection
         JPanel selectPanel = new JPanel(new GridBagLayout());
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
@@ -23,21 +23,12 @@ public class NbBaies extends JPanel {
         JLabel nombreBaiesLabel = new JLabel("Nombre de baies : ");
         selectPanel.add(nombreBaiesLabel, gbc);
 
-        gbc.gridy++;
-        JLabel nombreChassisLabel = new JLabel("Nombre de châssis : ");
-        selectPanel.add(nombreChassisLabel, gbc);
-
         gbc.gridx++;
-        gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.LINE_START;
 
         // Création du spinner pour sélectionner le nombre de baies
         spinnerNombreBaies = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); // Valeurs de 1 à 10 avec un pas de 1
         selectPanel.add(spinnerNombreBaies, gbc);
-
-        gbc.gridy++;
-        spinnerNombreChassis = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); // Valeurs de 1 à 10 avec un pas de 1
-        selectPanel.add(spinnerNombreChassis, gbc);
 
         add(selectPanel, BorderLayout.CENTER);
 
@@ -45,12 +36,9 @@ public class NbBaies extends JPanel {
         validerButton = new JButton("Valider");
         validerButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                // Récupérer la valeur sélectionnée dans le spinner
                 int nombreBaies = (int) spinnerNombreBaies.getValue();
-                int nombreChassis = (int) spinnerNombreChassis.getValue();
-
-                // Ajoutez ici le code à exécuter lorsque le bouton "Valider" est cliqué
-                JOptionPane.showMessageDialog(NbBaies.this, "Nombre de baies sélectionné : " + nombreBaies + "\nNombre de châssis sélectionné : " + nombreChassis);
+                window.addBaies(nombreBaies);
+                SwingUtilities.getWindowAncestor(NbBaies.this).dispose();
             }
         });
 
