@@ -8,5 +8,8 @@
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="Icon"/>
 	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/mysql-connector-j-8.3.0/mysql-connector-j-8.3.0/mysql-connector-j-8.3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-xtra-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itextpdf-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-pdfa-5.5.13.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

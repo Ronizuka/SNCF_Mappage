@@ -1,15 +1,28 @@
 package map;
 
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.PageSize;
+import com.itextpdf.text.pdf.PdfContentByte;
+import com.itextpdf.text.pdf.PdfTemplate;
+import com.itextpdf.text.pdf.PdfWriter;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.sql.*;
-import java.util.ArrayList;
-import java.util.List;
-import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.ArrayList;
+import java.util.List;
 
 public class Window {
 
@@ -70,9 +83,7 @@ public class Window {
         menuFichier.add(menuItemEnregistrer);
 
         JMenuItem menuItemExporterPlan = new JMenuItem("Exporter plan");
-        menuItemExporterPlan.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Exporter plan sélectionnée");
-        });
+        menuItemExporterPlan.addActionListener(e -> exportPlanToPDF());
         menuFichier.add(menuItemExporterPlan);
 
         menuFichier.addSeparator();
@@ -310,5 +321,53 @@ public class Window {
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+    }
+
+    private void exportPlanToPDF() {
+        // Ouvrir un dialogue de sélection de fichier
+        FileDialog fileDialog = new FileDialog(frame, "Choisir un fichier pour enregistrer le PDF", FileDialog.SAVE);
+        fileDialog.setFile("*.pdf");
+        fileDialog.setVisible(true);
+        String directory = fileDialog.getDirectory();
+        String file = fileDialog.getFile();
+
+        if (directory != null && file != null) {
+            String pdfPath = directory + file;
+            if (!pdfPath.toLowerCase().endsWith(".pdf")) {
+                pdfPath += ".pdf";
+            }
+
+            try {
+                // Créer le document PDF en format paysage
+                Document document = new Document(PageSize.A4.rotate());
+                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfPath));
+                document.open();
+
+                // Dessiner les baies et les équipements dans le PDF
+                drawPlanToPDF(document, writer);
+
+                document.close();
+                JOptionPane.showMessageDialog(frame, "Plan exporté avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
+            } catch (FileNotFoundException | DocumentException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Erreur lors de l'exportation du plan.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private void drawPlanToPDF(Document document, PdfWriter writer) {
+        PdfContentByte cb = writer.getDirectContent();
+        PdfTemplate template = cb.createTemplate(document.getPageSize().getWidth(), document.getPageSize().getHeight());
+        Graphics2D g2d = template.createGraphics(template.getWidth(), template.getHeight());
+
+        double scaleX = template.getWidth() / drawingArea.getWidth();
+        double scaleY = template.getHeight() / drawingArea.getHeight();
+        double scale = Math.min(scaleX, scaleY);
+
+        g2d.scale(scale, scale);
+        drawingArea.printAll(g2d);
+
+        g2d.dispose();
+        cb.addTemplate(template, 0, 0);
     }
 }
