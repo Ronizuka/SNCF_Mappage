@@ -411,6 +411,6 @@ public class Window {
             selectedButton.setBorder(null); // Reset the border of the previous selected button
         }
         selectedButton = button;
-        selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE)); // Highlight the selected button with a blue border
+        selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3)); // Highlight the selected button with a thicker blue border
     }
 }
