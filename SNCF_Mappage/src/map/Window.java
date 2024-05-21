@@ -175,6 +175,9 @@ public class Window {
                     } else if (index == 3) {
                         showDropdown();
                         currentAction = DrawingArea.ACTION_NONE;
+                    } else if (index == 5) {
+                        currentAction = DrawingArea.ACTION_DELETE;
+                        drawingArea.setCurrentAction(DrawingArea.ACTION_DELETE);
                     } else {
                         currentAction = DrawingArea.ACTION_NONE;
                         drawingArea.setCurrentAction(DrawingArea.ACTION_NONE);
@@ -212,6 +215,18 @@ public class Window {
                             selectedEquipmentHeight = 0;
                             drawingArea.repaint();
                             break;
+                        }
+                    }
+                } else if (currentAction == DrawingArea.ACTION_DELETE) {
+                    Point clickedPoint = adjustPoint(e.getPoint());
+                    for (DrawingArea.Baie baie : drawingArea.getBaies()) {
+                        if (baie.contains(clickedPoint)) {
+                            DrawingArea.Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
+                            if (equipmentToRemove != null) {
+                                baie.removeEquipment(equipmentToRemove);
+                                drawingArea.repaint();
+                                return;
+                            }
                         }
                     }
                 }

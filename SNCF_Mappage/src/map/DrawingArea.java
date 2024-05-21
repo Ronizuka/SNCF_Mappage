@@ -9,6 +9,7 @@ import javax.swing.*;
 class DrawingArea extends JPanel {
     public static final int ACTION_NONE = 0;
     public static final int ACTION_MOVE = 1;
+    public static final int ACTION_DELETE = 2;
 
     private String selectedComponent;
     private Point selectedComponentPosition;
@@ -30,21 +31,21 @@ class DrawingArea extends JPanel {
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
+                Point clickedPoint = adjustPoint(e.getPoint());
+                dragStartPoint = e.getPoint();
+
                 if (currentAction == ACTION_MOVE) {
-                    Point clickedPoint = adjustPoint(e.getPoint());
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
                             Equipment equipment = baie.getEquipmentAt(clickedPoint);
                             if (equipment != null) {
                                 draggedEquipment = equipment;
-                                dragStartPoint = clickedPoint;
                                 baie.removeEquipment(equipment); // Supprimer l'équipement de la position précédente
-                                break;
+                                repaint();
+                                return;
                             }
                         }
                     }
-                } else {
-                    dragStartPoint = e.getPoint();
                 }
             }
 
@@ -59,12 +60,9 @@ class DrawingArea extends JPanel {
                             break;
                         }
                     }
-                    currentAction = ACTION_NONE;  // Réinitialiser l'action après avoir lâché l'équipement
-                    dragStartPoint = null;
                     repaint();
-                } else {
-                    dragStartPoint = null;
                 }
+                dragStartPoint = null;
             }
 
             @Override
@@ -73,6 +71,13 @@ class DrawingArea extends JPanel {
                     Point clickedPoint = adjustPoint(e.getPoint());
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
+                            // Supprimer l'équipement existant à la position cliquée
+                            Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
+                            if (equipmentToRemove != null) {
+                                baie.removeEquipment(equipmentToRemove);
+                            }
+
+                            // Ajouter le nouvel équipement à la position cliquée
                             baie.addEquipment(selectedComponent, new Point(clickedPoint.x - selectedComponentWidth / 2, clickedPoint.y - selectedComponentHeight / 2), selectedComponentWidth, selectedComponentHeight);
                             selectedComponent = null;
                             selectedComponentPosition = null;
@@ -80,6 +85,18 @@ class DrawingArea extends JPanel {
                             selectedComponentHeight = 0;
                             repaint();
                             break;
+                        }
+                    }
+                } else if (currentAction == ACTION_DELETE) {
+                    Point clickedPoint = adjustPoint(e.getPoint());
+                    for (Baie baie : baies) {
+                        if (baie.contains(clickedPoint)) {
+                            Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
+                            if (equipmentToRemove != null) {
+                                baie.removeEquipment(equipmentToRemove);
+                                repaint();
+                                return;
+                            }
                         }
                     }
                 }
@@ -95,7 +112,7 @@ class DrawingArea extends JPanel {
                         draggedEquipment.position = dragEndPoint;
                         repaint();
                     }
-                } else if (currentAction == ACTION_NONE && dragStartPoint != null) {
+                } else if (dragStartPoint != null) {
                     Point dragEndPoint = e.getPoint();
                     offsetX += dragEndPoint.x - dragStartPoint.x;
                     offsetY += dragEndPoint.y - dragStartPoint.y;
@@ -108,22 +125,20 @@ class DrawingArea extends JPanel {
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                if (currentAction == ACTION_NONE) {
-                    Point mousePoint = e.getPoint();
-                    double prevScale = scale;
-                    if (e.getPreciseWheelRotation() < 0 && scale < 4.0) {
-                        scale *= 1.1;
-                    } else if (e.getPreciseWheelRotation() > 0 && scale > minScale) {
-                        scale /= 1.1;
-                    }
-
-                    // Adjust offset to keep mouse position consistent
-                    offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
-                    offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
-
-                    revalidate();
-                    repaint();
+                Point mousePoint = e.getPoint();
+                double prevScale = scale;
+                if (e.getPreciseWheelRotation() < 0 && scale < 4.0) {
+                    scale *= 1.1;
+                } else if (e.getPreciseWheelRotation() > 0 && scale > minScale) {
+                    scale /= 1.1;
                 }
+
+                // Adjust offset to keep mouse position consistent
+                offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
+                offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
+
+                revalidate();
+                repaint();
             }
         });
     }
