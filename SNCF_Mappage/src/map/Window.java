@@ -34,6 +34,8 @@ public class Window {
     private int selectedEquipmentHeight;
     private List<JMenuItem> disabledMenuItems;
     private List<JButton> disabledButtons;
+    private JButton selectedButton;
+    private int currentAction;
 
     public Window() {
         initialize();
@@ -166,8 +168,16 @@ public class Window {
             button.addActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
-                    if (index == 3) {
+                    setSelectedButton(button);
+                    if (index == 2) {
+                        currentAction = DrawingArea.ACTION_MOVE;
+                        drawingArea.setCurrentAction(DrawingArea.ACTION_MOVE);
+                    } else if (index == 3) {
                         showDropdown();
+                        currentAction = DrawingArea.ACTION_NONE;
+                    } else {
+                        currentAction = DrawingArea.ACTION_NONE;
+                        drawingArea.setCurrentAction(DrawingArea.ACTION_NONE);
                     }
                 }
             });
@@ -180,28 +190,37 @@ public class Window {
         frame.add(sidePanel, BorderLayout.WEST);
 
         drawingArea = new DrawingArea();
+        drawingArea.setCurrentAction(DrawingArea.ACTION_NONE);
         drawingArea.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (selectedEquipment != null) {
+                if (currentAction == DrawingArea.ACTION_NONE && selectedEquipment != null) {
                     Point clickedPoint = adjustPoint(e.getPoint());
                     for (DrawingArea.Baie baie : drawingArea.getBaies()) {
                         if (baie.contains(clickedPoint)) {
-                            baie.addEquipment(selectedEquipment, clickedPoint, selectedEquipmentWidth, selectedEquipmentHeight);
+                            // Supprimer l'équipement existant à la position cliquée
+                            DrawingArea.Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
+                            if (equipmentToRemove != null) {
+                                baie.removeEquipment(equipmentToRemove);
+                            }
+
+                            // Ajouter le nouvel équipement à la position cliquée
+                            baie.addEquipment(selectedEquipment, new Point(clickedPoint.x - selectedEquipmentWidth / 2, clickedPoint.y - selectedEquipmentHeight / 2), selectedEquipmentWidth, selectedEquipmentHeight);
+                            selectedEquipment = null;
+                            selectedEquipmentPosition = null;
+                            selectedEquipmentWidth = 0;
+                            selectedEquipmentHeight = 0;
+                            drawingArea.repaint();
                             break;
                         }
                     }
-                    selectedEquipment = null;
-                    selectedEquipmentPosition = null;
-                    selectedEquipmentWidth = 0;
-                    selectedEquipmentHeight = 0;
                 }
             }
         });
         drawingArea.addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseMoved(MouseEvent e) {
-                if (selectedEquipment != null) {
+                if (currentAction == DrawingArea.ACTION_NONE && selectedEquipment != null) {
                     selectedEquipmentPosition = adjustPoint(e.getPoint());
                     drawingArea.repaint();
                 }
@@ -282,8 +301,7 @@ public class Window {
     }
 
     private Point adjustPoint(Point p) {
-        return new Point((int) ((p.x - drawingArea.getOffsetX()) / drawingArea.getScale()), 
-                         (int) ((p.y - drawingArea.getOffsetY()) / drawingArea.getScale()));
+        return new Point((int) ((p.x - drawingArea.getOffsetX()) / drawingArea.getScale()), (int) ((p.y - drawingArea.getOffsetY()) / drawingArea.getScale()));
     }
 
     public void launch() {
@@ -312,7 +330,9 @@ public class Window {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
 
-                
+                // Lancer l'application principale
+                Window window = new Window();
+                window.launch();
             }
         });
         JFrame frame = new JFrame("SNCF Mappage - Connexion");
@@ -369,5 +389,13 @@ public class Window {
 
         g2d.dispose();
         cb.addTemplate(template, 0, 0);
+    }
+
+    private void setSelectedButton(JButton button) {
+        if (selectedButton != null) {
+            selectedButton.setBorder(null); // Reset the border of the previous selected button
+        }
+        selectedButton = button;
+        selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE)); // Highlight the selected button with a blue border
     }
 }

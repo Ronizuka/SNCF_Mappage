@@ -7,6 +7,9 @@ import java.util.List;
 import javax.swing.*;
 
 class DrawingArea extends JPanel {
+    public static final int ACTION_NONE = 0;
+    public static final int ACTION_MOVE = 1;
+
     private String selectedComponent;
     private Point selectedComponentPosition;
     private int selectedComponentWidth;
@@ -17,6 +20,8 @@ class DrawingArea extends JPanel {
     private double offsetX = 0;
     private double offsetY = 0;
     private Point dragStartPoint = null;
+    private Equipment draggedEquipment = null;
+    private int currentAction = ACTION_NONE;
 
     public DrawingArea() {
         setBackground(Color.WHITE);
@@ -24,38 +29,73 @@ class DrawingArea extends JPanel {
 
         addMouseListener(new MouseAdapter() {
             @Override
-            public void mouseClicked(MouseEvent e) {
-                if (selectedComponent != null) {
+            public void mousePressed(MouseEvent e) {
+                if (currentAction == ACTION_MOVE) {
                     Point clickedPoint = adjustPoint(e.getPoint());
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
-                            baie.addEquipment(selectedComponent, clickedPoint, selectedComponentWidth, selectedComponentHeight);
-                            break;
+                            Equipment equipment = baie.getEquipmentAt(clickedPoint);
+                            if (equipment != null) {
+                                draggedEquipment = equipment;
+                                dragStartPoint = clickedPoint;
+                                baie.removeEquipment(equipment); // Supprimer l'équipement de la position précédente
+                                break;
+                            }
                         }
                     }
-                    selectedComponent = null;
-                    selectedComponentPosition = null;
-                    selectedComponentWidth = 0;
-                    selectedComponentHeight = 0;
-                    repaint();
+                } else {
+                    dragStartPoint = e.getPoint();
                 }
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
-                dragStartPoint = e.getPoint();
+            public void mouseReleased(MouseEvent e) {
+                if (currentAction == ACTION_MOVE && draggedEquipment != null) {
+                    Point releasePoint = adjustPoint(e.getPoint());
+                    for (Baie baie : baies) {
+                        if (baie.contains(releasePoint)) {
+                            baie.addEquipment(draggedEquipment, releasePoint);
+                            draggedEquipment = null;
+                            break;
+                        }
+                    }
+                    currentAction = ACTION_NONE;  // Réinitialiser l'action après avoir lâché l'équipement
+                    dragStartPoint = null;
+                    repaint();
+                } else {
+                    dragStartPoint = null;
+                }
             }
 
             @Override
-            public void mouseReleased(MouseEvent e) {
-                dragStartPoint = null;
+            public void mouseClicked(MouseEvent e) {
+                if (currentAction == ACTION_NONE && selectedComponent != null) {
+                    Point clickedPoint = adjustPoint(e.getPoint());
+                    for (Baie baie : baies) {
+                        if (baie.contains(clickedPoint)) {
+                            baie.addEquipment(selectedComponent, new Point(clickedPoint.x - selectedComponentWidth / 2, clickedPoint.y - selectedComponentHeight / 2), selectedComponentWidth, selectedComponentHeight);
+                            selectedComponent = null;
+                            selectedComponentPosition = null;
+                            selectedComponentWidth = 0;
+                            selectedComponentHeight = 0;
+                            repaint();
+                            break;
+                        }
+                    }
+                }
             }
         });
 
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (dragStartPoint != null) {
+                if (currentAction == ACTION_MOVE && draggedEquipment != null) {
+                    Point dragEndPoint = adjustPoint(e.getPoint());
+                    if (dragStartPoint != null && dragEndPoint != null) {
+                        draggedEquipment.position = dragEndPoint;
+                        repaint();
+                    }
+                } else if (currentAction == ACTION_NONE && dragStartPoint != null) {
                     Point dragEndPoint = e.getPoint();
                     offsetX += dragEndPoint.x - dragStartPoint.x;
                     offsetY += dragEndPoint.y - dragStartPoint.y;
@@ -68,20 +108,22 @@ class DrawingArea extends JPanel {
         addMouseWheelListener(new MouseWheelListener() {
             @Override
             public void mouseWheelMoved(MouseWheelEvent e) {
-                Point mousePoint = e.getPoint();
-                double prevScale = scale;
-                if (e.getPreciseWheelRotation() < 0 && scale < 4.0) {
-                    scale *= 1.1;
-                } else if (e.getPreciseWheelRotation() > 0 && scale > minScale) {
-                    scale /= 1.1;
+                if (currentAction == ACTION_NONE) {
+                    Point mousePoint = e.getPoint();
+                    double prevScale = scale;
+                    if (e.getPreciseWheelRotation() < 0 && scale < 4.0) {
+                        scale *= 1.1;
+                    } else if (e.getPreciseWheelRotation() > 0 && scale > minScale) {
+                        scale /= 1.1;
+                    }
+
+                    // Adjust offset to keep mouse position consistent
+                    offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
+                    offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
+
+                    revalidate();
+                    repaint();
                 }
-
-                // Adjust offset to keep mouse position consistent
-                offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
-                offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
-
-                revalidate();
-                repaint();
             }
         });
     }
@@ -96,6 +138,10 @@ class DrawingArea extends JPanel {
 
         for (Baie baie : baies) {
             baie.draw(g2d);
+        }
+
+        if (currentAction == ACTION_MOVE && draggedEquipment != null) {
+            draggedEquipment.draw(g2d, 0, 0); // Dessiner l'équipement en déplacement
         }
     }
 
@@ -151,6 +197,10 @@ class DrawingArea extends JPanel {
         return baies;
     }
 
+    public void setCurrentAction(int action) {
+        this.currentAction = action;
+    }
+
     class Baie {
         private int x, y, width, height;
         private List<Equipment> equipments;
@@ -171,8 +221,26 @@ class DrawingArea extends JPanel {
             equipments.add(new Equipment(componentName, new Point(position.x - x, position.y - y), width, height));
         }
 
+        public void addEquipment(Equipment equipment, Point position) {
+            equipment.position = new Point(position.x - x, position.y - y);
+            equipments.add(equipment);
+        }
+
+        public void removeEquipment(Equipment equipment) {
+            equipments.remove(equipment);
+        }
+
         public boolean contains(Point p) {
             return p.x >= x && p.x <= x + width && p.y >= y && p.y <= y + height;
+        }
+
+        public Equipment getEquipmentAt(Point p) {
+            for (Equipment equipment : equipments) {
+                if (equipment.contains(new Point(p.x - x, p.y - y))) {
+                    return equipment;
+                }
+            }
+            return null;
         }
 
         public void draw(Graphics2D g2d) {
@@ -195,6 +263,14 @@ class DrawingArea extends JPanel {
             this.position = position;
             this.width = width;
             this.height = height;
+        }
+
+        public void move(int dx, int dy) {
+            position.translate(dx, dy);
+        }
+
+        public boolean contains(Point p) {
+            return p.x >= position.x && p.x <= position.x + width && p.y >= position.y && p.y <= position.y + height;
         }
 
         public void draw(Graphics2D g2d, int offsetX, int offsetY) {
