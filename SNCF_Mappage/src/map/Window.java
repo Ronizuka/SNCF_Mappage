@@ -9,6 +9,8 @@ import com.itextpdf.text.pdf.PdfWriter;
 
 import javax.imageio.ImageIO;
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
@@ -16,11 +18,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,6 +34,7 @@ public class Window {
     private List<JButton> disabledButtons;
     private JButton selectedButton;
     private int currentAction;
+    private MaterialManager materialManager;
 
     public Window() {
         initialize();
@@ -111,6 +110,27 @@ public class Window {
             disconnect();
         });
         menuConnexion.add(menuItemDeconnexion);
+
+        JMenu menuMateriel = new JMenu("Matériel");
+        menuBar.add(menuMateriel);
+
+        JMenuItem menuItemCreerMateriel = new JMenuItem("Créer un matériel");
+        menuItemCreerMateriel.addActionListener(e -> {
+            materialManager.creerMateriel();
+        });
+        menuMateriel.add(menuItemCreerMateriel);
+
+        JMenuItem menuItemModifierMateriel = new JMenuItem("Modifier un matériel");
+        menuItemModifierMateriel.addActionListener(e -> {
+            materialManager.modifierMateriel();
+        });
+        menuMateriel.add(menuItemModifierMateriel);
+
+        JMenuItem menuItemSupprimerMateriel = new JMenuItem("Supprimer un matériel");
+        menuItemSupprimerMateriel.addActionListener(e -> {
+            materialManager.supprimerMateriel();
+        });
+        menuMateriel.add(menuItemSupprimerMateriel);
 
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
 
@@ -257,6 +277,8 @@ public class Window {
                 }
             }
         }
+
+        materialManager = new MaterialManager(frame);  // Initialize MaterialManager
     }
 
     public void addBaies(int nombreBaies) {
@@ -412,5 +434,89 @@ public class Window {
         }
         selectedButton = button;
         selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3)); // Highlight the selected button with a thicker blue border
+    }
+
+    private JTextField createNumberField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
+        return field;
+    }
+
+    private JTextField createNumberField(int value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
+        return field;
+    }
+
+    private JTextField createFloatField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
+        return field;
+    }
+
+    private JTextField createFloatField(float value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
+        return field;
+    }
+
+    private JTextField createDoubleField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
+        return field;
+    }
+
+    private JTextField createDoubleField(double value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
+        return field;
+    }
+
+    private class NumberFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d+")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d+")) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+    }
+
+    private class FloatFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d*\\.?\\d*")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d*\\.?\\d*")) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+    }
+
+    private class DoubleFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d*\\.?\\d*")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d*\\.?\\d*")) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
     }
 }
