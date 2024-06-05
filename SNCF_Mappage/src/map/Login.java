@@ -3,6 +3,7 @@ package map;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,7 @@ public class Login extends JPanel {
         gbc.gridy = 0;
         gbc.anchor = GridBagConstraints.LINE_END;
         gbc.insets = new Insets(5, 5, 5, 5);
-        JLabel usernameLabel = new JLabel("Votre identifiant : ");
+        JLabel usernameLabel = new JLabel("Adresse mail : ");
         loginPanel.add(usernameLabel, gbc);
         gbc.gridy++;
         JLabel passwordLabel = new JLabel("Mot de passe : ");
@@ -41,21 +42,42 @@ public class Login extends JPanel {
         loginButton = new JButton("Se connecter");
         loginButton.addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
-                String identifiant = usernameField.getText();
-                String motDePasse = new String(passwordField.getPassword());
-                if (identifiant.equals("123") && motDePasse.equals("123")) {
+                String email = usernameField.getText();
+                String password = new String(passwordField.getPassword());
+                if (authenticate(email, password)) {
                     // Connexion réussie
                     JOptionPane.showMessageDialog(Login.this, "Connexion réussie!");
                     notifyLoginSuccessListeners();
                 } else {
                     // Afficher un message d'erreur
-                    JOptionPane.showMessageDialog(Login.this, "Identifiant ou mot de passe incorrect.", "Erreur de Connexion", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(Login.this, "Adresse mail ou mot de passe incorrect.", "Erreur de Connexion", JOptionPane.ERROR_MESSAGE);
                 }
             }
         });
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         buttonPanel.add(loginButton);
         add(buttonPanel, BorderLayout.SOUTH);
+    }
+
+    private boolean authenticate(String email, String password) {
+        boolean isAuthenticated = false;
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
+            String query = "SELECT * FROM users WHERE mail = ? AND pwd = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setString(1, email);
+            statement.setString(2, password);
+            ResultSet resultSet = statement.executeQuery();
+            if (resultSet.next()) {
+                isAuthenticated = true;
+            }
+            resultSet.close();
+            statement.close();
+            connection.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return isAuthenticated;
     }
 
     public void addLoginSuccessListener(LoginSuccessListener listener) {
