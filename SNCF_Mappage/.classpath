@@ -7,9 +7,9 @@
 	</classpathentry>
 	<classpathentry kind="src" path="src"/>
 	<classpathentry kind="src" path="Icon"/>
-	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/mysql-connector-j-8.3.0/mysql-connector-j-8.3.0/mysql-connector-j-8.3.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-xtra-5.5.13.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itextpdf-5.5.13.2.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-pdfa-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/itextpdf-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/itext-pdfa-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/itext-xtra-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/mysql-connector-j-8.3.0.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
