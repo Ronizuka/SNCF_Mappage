@@ -27,6 +27,7 @@ public class Window {
     private List<JButton> disabledButtons;
     private JButton selectedButton;
     private int currentAction;
+    private MaterialManager materialManager;
 
     public Window() {
         initialize();
@@ -86,17 +87,32 @@ public class Window {
         JMenu menuConnexion = new JMenu("Connexion");
         menuBar.add(menuConnexion);
 
-        JMenuItem menuItemSeConnecter = new JMenuItem("Se connecter avec un autre compte");
-        menuItemSeConnecter.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Se connecter avec un autre compte sélectionnée");
-        });
-        menuConnexion.add(menuItemSeConnecter);
-
         JMenuItem menuItemDeconnexion = new JMenuItem("Déconnexion");
         menuItemDeconnexion.addActionListener(e -> {
             disconnect();
         });
         menuConnexion.add(menuItemDeconnexion);
+
+        JMenu menuMateriel = new JMenu("Matériel");
+        menuBar.add(menuMateriel);
+
+        JMenuItem menuItemCreerMateriel = new JMenuItem("Créer un matériel");
+        menuItemCreerMateriel.addActionListener(e -> {
+            materialManager.creerMateriel();
+        });
+        menuMateriel.add(menuItemCreerMateriel);
+
+        JMenuItem menuItemModifierMateriel = new JMenuItem("Modifier un matériel");
+        menuItemModifierMateriel.addActionListener(e -> {
+            materialManager.modifierMateriel();
+        });
+        menuMateriel.add(menuItemModifierMateriel);
+
+        JMenuItem menuItemSupprimerMateriel = new JMenuItem("Supprimer un matériel");
+        menuItemSupprimerMateriel.addActionListener(e -> {
+            materialManager.supprimerMateriel();
+        });
+        menuMateriel.add(menuItemSupprimerMateriel);
 
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
 
@@ -171,7 +187,7 @@ public class Window {
             });
 
             sidePanel.add(button, gbc);
-            button.setEnabled(false);
+            button.setEnabled(false); // Désactiver les boutons
             disabledButtons.add(button);
         }
 
@@ -229,6 +245,8 @@ public class Window {
 
         disabledMenuItems = new ArrayList<>();
         BouttonManager.disableMenuItemsAndButtons(frame, disabledMenuItems, disabledButtons);
+
+        materialManager = new MaterialManager(frame); // Initialize MaterialManager
     }
 
     public void addBaies(int nombreBaies) {
@@ -319,9 +337,9 @@ public class Window {
 
     private void setSelectedButton(JButton button) {
         if (selectedButton != null) {
-            selectedButton.setBorder(null);
+            selectedButton.setBorder(null); // Reset the border of the previous selected button
         }
         selectedButton = button;
-        selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3));
+        selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3)); // Highlight the selected button with a thicker blue border
     }
 }

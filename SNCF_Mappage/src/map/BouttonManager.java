@@ -1,7 +1,6 @@
 package map;
-
-import javax.swing.*;
 import java.awt.*;
+import javax.swing.*;
 import java.util.List;
 
 public class BouttonManager {
@@ -15,7 +14,7 @@ public class BouttonManager {
                     if (menuItemComponent instanceof JMenuItem) {
                         JMenuItem menuItem = (JMenuItem) menuItemComponent;
                         String text = menuItem.getText();
-                        if (!text.equals("Nouveau plan") && !text.equals("Importer plan") && !text.equals("Quitter")) {
+                        if (!text.equals("Nouveau plan") && !text.equals("Importer plan") && !text.equals("Quitter") && !text.equals("Déconnexion")) {
                             menuItem.setEnabled(false);
                             disabledMenuItems.add(menuItem);
                         }
@@ -23,7 +22,6 @@ public class BouttonManager {
                 }
             }
         }
-
         for (JButton button : disabledButtons) {
             button.setEnabled(false);
         }
