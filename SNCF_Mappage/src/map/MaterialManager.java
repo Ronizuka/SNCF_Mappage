@@ -1,6 +1,8 @@
 package map;
 
 import javax.swing.*;
+import javax.swing.text.AbstractDocument;
+import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.sql.*;
 import java.util.ArrayList;
@@ -16,21 +18,21 @@ public class MaterialManager {
 
     public void creerMateriel() {
         JTextField nomField = new JTextField();
-        JTextField longueurField = new JTextField();
-        JTextField hauteurField = new JTextField();
-        JTextField profondeurField = new JTextField();
+        JTextField longueurField = createNumberField();
+        JTextField hauteurField = createNumberField();
+        JTextField profondeurField = createNumberField();
         JTextField descriptionField = new JTextField();
         JTextField refDocField = new JTextField();
         JTextField symboleField = new JTextField();
         JTextField refConstructeurField = new JTextField();
-        JTextField puissanceMaxField = new JTextField();
-        JTextField alimMinField = new JTextField();
-        JTextField alimMaxField = new JTextField();
-        JTextField alimNomField = new JTextField();
-        JTextField tarifField = new JTextField();
+        JTextField puissanceMaxField = createFloatField();
+        JTextField alimMinField = createFloatField();
+        JTextField alimMaxField = createFloatField();
+        JTextField alimNomField = createFloatField();
+        JTextField tarifField = createDoubleField();
         JComboBox<String> fixationField = new JComboBox<>(new String[]{"ND", "R", "F", "PT", "PF", "PS", "Dv"});
-        JTextField poidsField = new JTextField();
-        JTextField protectionCCField = new JTextField();
+        JTextField poidsField = createDoubleField();
+        JTextField protectionCCField = createNumberField();
         JComboBox<String> typeField = new JComboBox<>(new String[]{"PRM", "STD"});
 
         JPanel panel = new JPanel(new GridLayout(18, 2));
@@ -170,22 +172,22 @@ public class MaterialManager {
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
                 JTextField nomField = new JTextField(resultSet.getString("nomEquipt"));
-                JTextField longueurField = new JTextField(String.valueOf(resultSet.getInt("longueur")));
-                JTextField hauteurField = new JTextField(String.valueOf(resultSet.getInt("hauteur")));
-                JTextField profondeurField = new JTextField(String.valueOf(resultSet.getInt("profondeur")));
+                JTextField longueurField = createNumberField(resultSet.getInt("longueur"));
+                JTextField hauteurField = createNumberField(resultSet.getInt("hauteur"));
+                JTextField profondeurField = createNumberField(resultSet.getInt("profondeur"));
                 JTextField descriptionField = new JTextField(resultSet.getString("description"));
                 JTextField refDocField = new JTextField(resultSet.getString("refDoc"));
                 JTextField symboleField = new JTextField(resultSet.getString("symbole"));
                 JTextField refConstructeurField = new JTextField(resultSet.getString("RefConstructeur"));
-                JTextField puissanceMaxField = new JTextField(String.valueOf(resultSet.getFloat("puissanceMax")));
-                JTextField alimMinField = new JTextField(String.valueOf(resultSet.getFloat("alimMin")));
-                JTextField alimMaxField = new JTextField(String.valueOf(resultSet.getFloat("alimMax")));
-                JTextField alimNomField = new JTextField(String.valueOf(resultSet.getFloat("alimNom")));
-                JTextField tarifField = new JTextField(String.valueOf(resultSet.getDouble("tarif")));
+                JTextField puissanceMaxField = createFloatField(resultSet.getFloat("puissanceMax"));
+                JTextField alimMinField = createFloatField(resultSet.getFloat("alimMin"));
+                JTextField alimMaxField = createFloatField(resultSet.getFloat("alimMax"));
+                JTextField alimNomField = createFloatField(resultSet.getFloat("alimNom"));
+                JTextField tarifField = createDoubleField(resultSet.getDouble("tarif"));
                 JComboBox<String> fixationField = new JComboBox<>(new String[]{"ND", "R", "F", "PT", "PF", "PS", "Dv"});
                 fixationField.setSelectedItem(resultSet.getString("fixation"));
-                JTextField poidsField = new JTextField(String.valueOf(resultSet.getDouble("poids")));
-                JTextField protectionCCField = new JTextField(String.valueOf(resultSet.getInt("protectionCC")));
+                JTextField poidsField = createDoubleField(resultSet.getDouble("poids"));
+                JTextField protectionCCField = createNumberField(resultSet.getInt("protectionCC"));
                 JComboBox<String> typeField = new JComboBox<>(new String[]{"PRM", "STD"});
                 typeField.setSelectedItem(resultSet.getString("type"));
 
@@ -340,6 +342,90 @@ public class MaterialManager {
             } catch (SQLException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Erreur lors de la suppression du matériel.", "Erreur", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    private JTextField createNumberField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
+        return field;
+    }
+
+    private JTextField createNumberField(int value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
+        return field;
+    }
+
+    private JTextField createFloatField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
+        return field;
+    }
+
+    private JTextField createFloatField(float value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
+        return field;
+    }
+
+    private JTextField createDoubleField() {
+        JTextField field = new JTextField();
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
+        return field;
+    }
+
+    private JTextField createDoubleField(double value) {
+        JTextField field = new JTextField(String.valueOf(value));
+        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
+        return field;
+    }
+
+    private class NumberFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d*")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d*")) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+    }
+
+    private class FloatFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d*\\.?\\d*")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d*\\.?\\d*")) {
+                super.replace(fb, offset, length, text, attrs);
+            }
+        }
+    }
+
+    private class DoubleFilter extends DocumentFilter {
+        @Override
+        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
+            if (string.matches("\\d*\\.?\\d*")) {
+                super.insertString(fb, offset, string, attr);
+            }
+        }
+
+        @Override
+        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
+            if (text.matches("\\d*\\.?\\d*")) {
+                super.replace(fb, offset, length, text, attrs);
             }
         }
     }

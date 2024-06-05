@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/itext-pdfa-5.5.13.2.jar"/>
 	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/itext-xtra-5.5.13.2.jar"/>
 	<classpathentry kind="lib" path="D:/Polytech/Projet_POLYTECH/Projet CO 2/librairies_appli/librairies_appli/mysql-connector-j-8.3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/33767/Downloads/gson-2.8.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

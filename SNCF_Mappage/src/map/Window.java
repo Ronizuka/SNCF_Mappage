@@ -1,24 +1,17 @@
 package map;
 
-import com.itextpdf.text.Document;
-import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.PageSize;
-import com.itextpdf.text.pdf.PdfContentByte;
-import com.itextpdf.text.pdf.PdfTemplate;
-import com.itextpdf.text.pdf.PdfWriter;
-
 import javax.imageio.ImageIO;
 import javax.swing.*;
-import javax.swing.text.AbstractDocument;
-import javax.swing.text.DocumentFilter;
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.BufferedImage;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -57,7 +50,7 @@ public class Window {
 
         JMenuItem menuItemNouveauPlan = new JMenuItem("Nouveau plan");
         menuItemNouveauPlan.addActionListener(e -> {
-            enableMenuItemsAndButtons();
+            BouttonManager.enableMenuItemsAndButtons(disabledMenuItems, disabledButtons);
             JFrame nbBaiesFrame = new JFrame("Nombre de Baies");
             nbBaiesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
             nbBaiesFrame.getContentPane().add(new NbBaies(this));
@@ -69,22 +62,17 @@ public class Window {
         menuFichier.add(menuItemNouveauPlan);
 
         JMenuItem menuItemImporterPlan = new JMenuItem("Importer plan");
-        menuItemImporterPlan.addActionListener(e -> {
-            enableMenuItemsAndButtons();
-            JOptionPane.showMessageDialog(frame, "Option Importer plan sélectionnée");
-        });
+        menuItemImporterPlan.addActionListener(e -> Import.loadPlan(frame, drawingArea, disabledMenuItems, disabledButtons));
         menuItemImporterPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemImporterPlan);
 
         JMenuItem menuItemEnregistrer = new JMenuItem("Enregistrer");
-        menuItemEnregistrer.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Enregistrer sélectionnée");
-        });
+        menuItemEnregistrer.addActionListener(e -> Import.savePlan(frame, drawingArea.getBaies()));
         menuItemEnregistrer.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_S, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemEnregistrer);
 
         JMenuItem menuItemExporterPlan = new JMenuItem("Exporter plan");
-        menuItemExporterPlan.addActionListener(e -> exportPlanToPDF());
+        menuItemExporterPlan.addActionListener(e -> ExportPDF.exportPlanToPDF(frame, drawingArea));
         menuFichier.add(menuItemExporterPlan);
 
         menuFichier.addSeparator();
@@ -98,12 +86,6 @@ public class Window {
 
         JMenu menuConnexion = new JMenu("Connexion");
         menuBar.add(menuConnexion);
-
-        JMenuItem menuItemSeConnecter = new JMenuItem("Se connecter avec un autre compte");
-        menuItemSeConnecter.addActionListener(e -> {
-            JOptionPane.showMessageDialog(frame, "Option Se connecter avec un autre compte sélectionnée");
-        });
-        menuConnexion.add(menuItemSeConnecter);
 
         JMenuItem menuItemDeconnexion = new JMenuItem("Déconnexion");
         menuItemDeconnexion.addActionListener(e -> {
@@ -148,7 +130,6 @@ public class Window {
             gbc.gridy = i;
             JButton button = new JButton();
 
-            // Charger les images et les affecter comme icônes des boutons
             try {
                 URL imageUrl = null;
                 switch (i) {
@@ -221,13 +202,11 @@ public class Window {
                     Point clickedPoint = adjustPoint(e.getPoint());
                     for (DrawingArea.Baie baie : drawingArea.getBaies()) {
                         if (baie.contains(clickedPoint)) {
-                            // Supprimer l'équipement existant à la position cliquée
                             DrawingArea.Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
                             if (equipmentToRemove != null) {
                                 baie.removeEquipment(equipmentToRemove);
                             }
 
-                            // Ajouter le nouvel équipement à la position cliquée
                             baie.addEquipment(selectedEquipment, new Point(clickedPoint.x - selectedEquipmentWidth / 2, clickedPoint.y - selectedEquipmentHeight / 2), selectedEquipmentWidth, selectedEquipmentHeight);
                             selectedEquipment = null;
                             selectedEquipmentPosition = null;
@@ -265,33 +244,13 @@ public class Window {
         frame.add(scrollPane, BorderLayout.CENTER);
 
         disabledMenuItems = new ArrayList<>();
-        for (Component menuComponent : menuBar.getComponents()) {
-            if (menuComponent instanceof JMenu) {
-                JMenu menu = (JMenu) menuComponent;
-                for (Component menuItemComponent : menu.getMenuComponents()) {
-                    if (menuItemComponent instanceof JMenuItem && menuItemComponent != menuItemNouveauPlan && menuItemComponent != menuItemImporterPlan && menuItemComponent != menuItemQuitter) {
-                        JMenuItem menuItem = (JMenuItem) menuItemComponent;
-                        menuItem.setEnabled(false); // Désactiver les éléments de menu
-                        disabledMenuItems.add(menuItem);
-                    }
-                }
-            }
-        }
+        BouttonManager.disableMenuItemsAndButtons(frame, disabledMenuItems, disabledButtons);
 
-        materialManager = new MaterialManager(frame);  // Initialize MaterialManager
+        materialManager = new MaterialManager(frame); // Initialize MaterialManager
     }
 
     public void addBaies(int nombreBaies) {
         drawingArea.addBaies(nombreBaies);
-    }
-
-    private void enableMenuItemsAndButtons() {
-        for (JMenuItem menuItem : disabledMenuItems) {
-            menuItem.setEnabled(true);
-        }
-        for (JButton button : disabledButtons) {
-            button.setEnabled(true);
-        }
     }
 
     private void showDropdown() {
@@ -352,14 +311,11 @@ public class Window {
     }
 
     private void disconnect() {
-        // Fermer la fenêtre principale
         frame.dispose();
-        // Relancer la fenêtre de connexion
         Login loginWindow = new Login();
         loginWindow.addLoginSuccessListener(new Login.LoginSuccessListener() {
             @Override
             public void onLoginSuccess() {
-                // Une fois que l'utilisateur est connecté, fermer la fenêtre de connexion
                 JFrame frame = new JFrame("SNCF Mappage - Connexion");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.getContentPane().add(loginWindow);
@@ -367,7 +323,6 @@ public class Window {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
 
-                // Lancer l'application principale
                 Window window = new Window();
                 window.launch();
             }
@@ -380,143 +335,11 @@ public class Window {
         frame.setVisible(true);
     }
 
-    private void exportPlanToPDF() {
-        // Ouvrir un dialogue de sélection de fichier
-        FileDialog fileDialog = new FileDialog(frame, "Choisir un fichier pour enregistrer le PDF", FileDialog.SAVE);
-        fileDialog.setFile("*.pdf");
-        fileDialog.setVisible(true);
-        String directory = fileDialog.getDirectory();
-        String file = fileDialog.getFile();
-
-        if (directory != null && file != null) {
-            String pdfPath = directory + file;
-            if (!pdfPath.toLowerCase().endsWith(".pdf")) {
-                pdfPath += ".pdf";
-            }
-
-            try {
-                // Créer le document PDF en format paysage
-                Document document = new Document(PageSize.A4.rotate());
-                PdfWriter writer = PdfWriter.getInstance(document, new FileOutputStream(pdfPath));
-                document.open();
-
-                // Dessiner les baies et les équipements dans le PDF
-                drawPlanToPDF(document, writer);
-
-                document.close();
-                JOptionPane.showMessageDialog(frame, "Plan exporté avec succès !", "Succès", JOptionPane.INFORMATION_MESSAGE);
-            } catch (FileNotFoundException | DocumentException e) {
-                e.printStackTrace();
-                JOptionPane.showMessageDialog(frame, "Erreur lors de l'exportation du plan.", "Erreur", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-    }
-
-    private void drawPlanToPDF(Document document, PdfWriter writer) {
-        PdfContentByte cb = writer.getDirectContent();
-        PdfTemplate template = cb.createTemplate(document.getPageSize().getWidth(), document.getPageSize().getHeight());
-        Graphics2D g2d = template.createGraphics(template.getWidth(), template.getHeight());
-
-        double scaleX = template.getWidth() / drawingArea.getWidth();
-        double scaleY = template.getHeight() / drawingArea.getHeight();
-        double scale = Math.min(scaleX, scaleY);
-
-        g2d.scale(scale, scale);
-        drawingArea.printAll(g2d);
-
-        g2d.dispose();
-        cb.addTemplate(template, 0, 0);
-    }
-
     private void setSelectedButton(JButton button) {
         if (selectedButton != null) {
             selectedButton.setBorder(null); // Reset the border of the previous selected button
         }
         selectedButton = button;
         selectedButton.setBorder(BorderFactory.createLineBorder(Color.BLUE, 3)); // Highlight the selected button with a thicker blue border
-    }
-
-    private JTextField createNumberField() {
-        JTextField field = new JTextField();
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
-        return field;
-    }
-
-    private JTextField createNumberField(int value) {
-        JTextField field = new JTextField(String.valueOf(value));
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
-        return field;
-    }
-
-    private JTextField createFloatField() {
-        JTextField field = new JTextField();
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
-        return field;
-    }
-
-    private JTextField createFloatField(float value) {
-        JTextField field = new JTextField(String.valueOf(value));
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
-        return field;
-    }
-
-    private JTextField createDoubleField() {
-        JTextField field = new JTextField();
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
-        return field;
-    }
-
-    private JTextField createDoubleField(double value) {
-        JTextField field = new JTextField(String.valueOf(value));
-        ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
-        return field;
-    }
-
-    private class NumberFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
-            if (string.matches("\\d+")) {
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
-            if (text.matches("\\d+")) {
-                super.replace(fb, offset, length, text, attrs);
-            }
-        }
-    }
-
-    private class FloatFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
-            if (string.matches("\\d*\\.?\\d*")) {
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
-            if (text.matches("\\d*\\.?\\d*")) {
-                super.replace(fb, offset, length, text, attrs);
-            }
-        }
-    }
-
-    private class DoubleFilter extends DocumentFilter {
-        @Override
-        public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
-            if (string.matches("\\d*\\.?\\d*")) {
-                super.insertString(fb, offset, string, attr);
-            }
-        }
-
-        @Override
-        public void replace(FilterBypass fb, int offset, int length, String text, javax.swing.text.AttributeSet attrs) throws javax.swing.text.BadLocationException {
-            if (text.matches("\\d*\\.?\\d*")) {
-                super.replace(fb, offset, length, text, attrs);
-            }
-        }
     }
 }
