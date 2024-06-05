@@ -1,12 +1,12 @@
 package map;
 
+import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
-import javax.swing.*;
 
-class DrawingArea extends JPanel {
+public class DrawingArea extends JPanel {
     public static final int ACTION_NONE = 0;
     public static final int ACTION_MOVE = 1;
     public static final int ACTION_DELETE = 2;
@@ -40,7 +40,7 @@ class DrawingArea extends JPanel {
                             Equipment equipment = baie.getEquipmentAt(clickedPoint);
                             if (equipment != null) {
                                 draggedEquipment = equipment;
-                                baie.removeEquipment(equipment); // Supprimer l'équipement de la position précédente
+                                baie.removeEquipment(equipment);
                                 repaint();
                                 return;
                             }
@@ -71,13 +71,11 @@ class DrawingArea extends JPanel {
                     Point clickedPoint = adjustPoint(e.getPoint());
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
-                            // Supprimer l'équipement existant à la position cliquée
                             Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
                             if (equipmentToRemove != null) {
                                 baie.removeEquipment(equipmentToRemove);
                             }
 
-                            // Ajouter le nouvel équipement à la position cliquée
                             baie.addEquipment(selectedComponent, new Point(clickedPoint.x - selectedComponentWidth / 2, clickedPoint.y - selectedComponentHeight / 2), selectedComponentWidth, selectedComponentHeight);
                             selectedComponent = null;
                             selectedComponentPosition = null;
@@ -133,7 +131,6 @@ class DrawingArea extends JPanel {
                     scale /= 1.1;
                 }
 
-                // Adjust offset to keep mouse position consistent
                 offsetX = mousePoint.x - (mousePoint.x - offsetX) * (scale / prevScale);
                 offsetY = mousePoint.y - (mousePoint.y - offsetY) * (scale / prevScale);
 
@@ -156,7 +153,7 @@ class DrawingArea extends JPanel {
         }
 
         if (currentAction == ACTION_MOVE && draggedEquipment != null) {
-            draggedEquipment.draw(g2d, 0, 0); // Dessiner l'équipement en déplacement
+            draggedEquipment.draw(g2d, 0, 0);
         }
     }
 
@@ -180,12 +177,12 @@ class DrawingArea extends JPanel {
             totalWidth = x + baieWidth;
             maxHeight = Math.max(maxHeight, y + baieHeight);
         }
-        // Adjust the scale to fit all baies
+
         int panelWidth = getWidth();
         int panelHeight = getHeight();
         double scaleX = panelWidth / (double) totalWidth;
         double scaleY = panelHeight / (double) maxHeight;
-        scale = Math.min(scaleX, scaleY) * 0.9; // Apply a little padding
+        scale = Math.min(scaleX, scaleY) * 0.9;
         minScale = scale;
         offsetX = (panelWidth - totalWidth * scale) / 2;
         offsetY = (panelHeight - maxHeight * scale) / 2;
@@ -212,8 +209,36 @@ class DrawingArea extends JPanel {
         return baies;
     }
 
+    public void setBaies(List<Baie> baies) {
+        this.baies = baies;
+        fitToScreen();
+    }
+
     public void setCurrentAction(int action) {
         this.currentAction = action;
+    }
+
+    public void fitToScreen() {
+        if (baies.isEmpty()) {
+            return;
+        }
+
+        int totalWidth = 0;
+        int maxHeight = 0;
+        for (Baie baie : baies) {
+            totalWidth = Math.max(totalWidth, baie.x + baie.width);
+            maxHeight = Math.max(maxHeight, baie.y + baie.height);
+        }
+
+        int panelWidth = getWidth();
+        int panelHeight = getHeight();
+        double scaleX = panelWidth / (double) totalWidth;
+        double scaleY = panelHeight / (double) maxHeight;
+        scale = Math.min(scaleX, scaleY) * 0.9;
+        minScale = scale;
+        offsetX = (panelWidth - totalWidth * scale) / 2;
+        offsetY = (panelHeight - maxHeight * scale) / 2;
+        repaint();
     }
 
     class Baie {
@@ -293,18 +318,18 @@ class DrawingArea extends JPanel {
             int drawY = position.y + offsetY;
 
             if (width == 60 && height == 60) {
-                g2d.setColor(Color.BLUE); // Couleur bleue pour les équipements avec dimensions par défaut
+                g2d.setColor(Color.BLUE);
             } else {
-                g2d.setColor(new Color(173, 216, 230)); // Couleur bleu ciel pour les autres équipements
+                g2d.setColor(new Color(173, 216, 230));
             }
-            g2d.fillRect(drawX, drawY, width, height); // Remplir le rectangle avant de dessiner le texte
-            g2d.setColor(Color.GREEN); // Bordure verte pour tous les équipements
-            g2d.drawRect(drawX, drawY, width, height); // Dessiner la bordure
+            g2d.fillRect(drawX, drawY, width, height);
+            g2d.setColor(Color.GREEN);
+            g2d.drawRect(drawX, drawY, width, height);
 
             FontMetrics metrics = g2d.getFontMetrics();
             int textX = drawX + (width - metrics.stringWidth(name)) / 2;
             int textY = drawY + ((height - metrics.getHeight()) / 2) + metrics.getAscent();
-            g2d.setColor(Color.BLACK); // Couleur du texte en noir
+            g2d.setColor(Color.BLACK);
             g2d.drawString(name, textX, textY);
         }
     }

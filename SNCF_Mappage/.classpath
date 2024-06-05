@@ -11,5 +11,6 @@
 	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-xtra-5.5.13.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itextpdf-5.5.13.2.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/itext-pdfa-5.5.13.2.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Roniz/Downloads/gson-2.8.9.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
