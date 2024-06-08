@@ -249,8 +249,8 @@ public class Window {
         materialManager = new MaterialManager(frame); // Initialize MaterialManager
     }
 
-    public void addBaies(int nombreBaies) {
-        drawingArea.addBaies(nombreBaies);
+    public void addChassis(int nombreChassis, int largeurChassis, int hauteurChassis) {
+        drawingArea.addChassis(nombreChassis, largeurChassis, hauteurChassis);
     }
 
     private void showDropdown() {

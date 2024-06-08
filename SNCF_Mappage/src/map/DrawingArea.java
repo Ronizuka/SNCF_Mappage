@@ -164,18 +164,16 @@ public class DrawingArea extends JPanel {
         System.out.println("Component selected: " + componentName + " with width=" + width + " and height=" + height);
     }
 
-    public void addBaies(int nombreBaies) {
+    public void addChassis(int nombreChassis, int largeurChassis, int hauteurChassis) {
         baies.clear();
         int totalWidth = 0;
         int maxHeight = 0;
-        for (int i = 0; i < nombreBaies; i++) {
-            int baieWidth = 1300;
-            int baieHeight = 2000;
-            int x = 150 + i * (baieWidth + 50);
+        for (int i = 0; i < nombreChassis; i++) {
+            int x = 150 + i * (largeurChassis + 50);
             int y = 100;
-            baies.add(new Baie(x, y, baieWidth, baieHeight));
-            totalWidth = x + baieWidth;
-            maxHeight = Math.max(maxHeight, y + baieHeight);
+            baies.add(new Baie(x, y, largeurChassis, hauteurChassis));
+            totalWidth = x + largeurChassis;
+            maxHeight = Math.max(maxHeight, y + hauteurChassis);
         }
 
         int panelWidth = getWidth();
@@ -188,6 +186,7 @@ public class DrawingArea extends JPanel {
         offsetY = (panelHeight - maxHeight * scale) / 2;
         repaint();
     }
+
 
     private Point adjustPoint(Point p) {
         return new Point((int) ((p.x - offsetX) / scale), (int) ((p.y - offsetY) / scale));
