@@ -15,6 +15,7 @@ public class DrawingArea extends JPanel {
     private Point selectedComponentPosition;
     private int selectedComponentWidth;
     private int selectedComponentHeight;
+    private int selectedComponentId;
     private List<Baie> baies;
     private double scale = 1.0;
     private double minScale = 1.0;
@@ -24,25 +25,30 @@ public class DrawingArea extends JPanel {
     private Equipment draggedEquipment = null;
     private int currentAction = ACTION_NONE;
 
-    public DrawingArea() {
+    private ContextMenuManager contextMenuManager;
+
+    public DrawingArea(ContextMenuManager contextMenuManager) {
+        this.contextMenuManager = contextMenuManager;
         setBackground(Color.WHITE);
         baies = new ArrayList<>();
 
         addMouseListener(new MouseAdapter() {
             @Override
             public void mousePressed(MouseEvent e) {
-                Point clickedPoint = adjustPoint(e.getPoint());
-                dragStartPoint = e.getPoint();
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    Point clickedPoint = adjustPoint(e.getPoint());
+                    dragStartPoint = e.getPoint();
 
-                if (currentAction == ACTION_MOVE) {
-                    for (Baie baie : baies) {
-                        if (baie.contains(clickedPoint)) {
-                            Equipment equipment = baie.getEquipmentAt(clickedPoint);
-                            if (equipment != null) {
-                                draggedEquipment = equipment;
-                                baie.removeEquipment(equipment);
-                                repaint();
-                                return;
+                    if (currentAction == ACTION_MOVE) {
+                        for (Baie baie : baies) {
+                            if (baie.contains(clickedPoint)) {
+                                Equipment equipment = baie.getEquipmentAt(clickedPoint);
+                                if (equipment != null) {
+                                    draggedEquipment = equipment;
+                                    baie.removeEquipment(equipment);
+                                    repaint();
+                                    return;
+                                }
                             }
                         }
                     }
@@ -51,24 +57,36 @@ public class DrawingArea extends JPanel {
 
             @Override
             public void mouseReleased(MouseEvent e) {
-                if (currentAction == ACTION_MOVE && draggedEquipment != null) {
-                    Point releasePoint = adjustPoint(e.getPoint());
-                    for (Baie baie : baies) {
-                        if (baie.contains(releasePoint)) {
-                            baie.addEquipment(draggedEquipment, releasePoint);
-                            draggedEquipment = null;
-                            break;
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    if (currentAction == ACTION_MOVE && draggedEquipment != null) {
+                        Point releasePoint = adjustPoint(e.getPoint());
+                        for (Baie baie : baies) {
+                            if (baie.contains(releasePoint)) {
+                                baie.addEquipment(draggedEquipment);
+                                draggedEquipment = null;
+                                break;
+                            }
                         }
+                        repaint();
                     }
-                    repaint();
+                    dragStartPoint = null;
                 }
-                dragStartPoint = null;
             }
 
             @Override
             public void mouseClicked(MouseEvent e) {
-                if (currentAction == ACTION_NONE && selectedComponent != null) {
-                    Point clickedPoint = adjustPoint(e.getPoint());
+                Point clickedPoint = adjustPoint(e.getPoint());
+                if (SwingUtilities.isRightMouseButton(e)) {
+                    for (Baie baie : baies) {
+                        if (baie.contains(clickedPoint)) {
+                            Equipment equipment = baie.getEquipmentAt(clickedPoint);
+                            if (equipment != null) {
+                                contextMenuManager.showContextMenu(DrawingArea.this, e.getX(), e.getY(), equipment.getId());
+                                return;
+                            }
+                        }
+                    }
+                } else if (currentAction == ACTION_NONE && selectedComponent != null) {
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
                             Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
@@ -76,17 +94,18 @@ public class DrawingArea extends JPanel {
                                 baie.removeEquipment(equipmentToRemove);
                             }
 
-                            baie.addEquipment(selectedComponent, new Point(clickedPoint.x - selectedComponentWidth / 2, clickedPoint.y - selectedComponentHeight / 2), selectedComponentWidth, selectedComponentHeight);
+                            Equipment newEquipment = new Equipment(selectedComponent, new Point(clickedPoint.x - selectedComponentWidth / 2, clickedPoint.y - selectedComponentHeight / 2), selectedComponentWidth, selectedComponentHeight, selectedComponentId);
+                            baie.addEquipment(newEquipment);
                             selectedComponent = null;
                             selectedComponentPosition = null;
                             selectedComponentWidth = 0;
                             selectedComponentHeight = 0;
+                            selectedComponentId = 0;
                             repaint();
                             break;
                         }
                     }
                 } else if (currentAction == ACTION_DELETE) {
-                    Point clickedPoint = adjustPoint(e.getPoint());
                     for (Baie baie : baies) {
                         if (baie.contains(clickedPoint)) {
                             Equipment equipmentToRemove = baie.getEquipmentAt(clickedPoint);
@@ -104,18 +123,20 @@ public class DrawingArea extends JPanel {
         addMouseMotionListener(new MouseAdapter() {
             @Override
             public void mouseDragged(MouseEvent e) {
-                if (currentAction == ACTION_MOVE && draggedEquipment != null) {
-                    Point dragEndPoint = adjustPoint(e.getPoint());
-                    if (dragStartPoint != null && dragEndPoint != null) {
-                        draggedEquipment.position = dragEndPoint;
+                if (SwingUtilities.isLeftMouseButton(e)) {
+                    if (currentAction == ACTION_MOVE && draggedEquipment != null) {
+                        Point dragEndPoint = adjustPoint(e.getPoint());
+                        if (dragStartPoint != null && dragEndPoint != null) {
+                            draggedEquipment.position = dragEndPoint;
+                            repaint();
+                        }
+                    } else if (dragStartPoint != null) {
+                        Point dragEndPoint = e.getPoint();
+                        offsetX += dragEndPoint.x - dragStartPoint.x;
+                        offsetY += dragEndPoint.y - dragStartPoint.y;
+                        dragStartPoint = dragEndPoint;
                         repaint();
                     }
-                } else if (dragStartPoint != null) {
-                    Point dragEndPoint = e.getPoint();
-                    offsetX += dragEndPoint.x - dragStartPoint.x;
-                    offsetY += dragEndPoint.y - dragStartPoint.y;
-                    dragStartPoint = dragEndPoint;
-                    repaint();
                 }
             }
         });
@@ -157,11 +178,12 @@ public class DrawingArea extends JPanel {
         }
     }
 
-    public void selectComponent(String componentName, int width, int height) {
+    public void selectComponent(String componentName, int width, int height, int id) {
         selectedComponent = componentName;
         selectedComponentWidth = width;
         selectedComponentHeight = height;
-        System.out.println("Component selected: " + componentName + " with width=" + width + " and height=" + height);
+        selectedComponentId = id;
+        System.out.println("Component selected: " + componentName + " with width=" + width + " and height=" + height + " and ID=" + id);
     }
 
     public void addChassis(int nombreChassis, int largeurChassis, int hauteurChassis) {
@@ -169,11 +191,13 @@ public class DrawingArea extends JPanel {
         int totalWidth = 0;
         int maxHeight = 0;
         for (int i = 0; i < nombreChassis; i++) {
-            int x = 150 + i * (largeurChassis + 50);
+            int baieWidth = largeurChassis;
+            int baieHeight = hauteurChassis;
+            int x = 150 + i * (baieWidth + 50);
             int y = 100;
-            baies.add(new Baie(x, y, largeurChassis, hauteurChassis));
-            totalWidth = x + largeurChassis;
-            maxHeight = Math.max(maxHeight, y + hauteurChassis);
+            baies.add(new Baie(x, y, baieWidth, baieHeight));
+            totalWidth = x + baieWidth;
+            maxHeight = Math.max(maxHeight, y + baieHeight);
         }
 
         int panelWidth = getWidth();
@@ -186,7 +210,6 @@ public class DrawingArea extends JPanel {
         offsetY = (panelHeight - maxHeight * scale) / 2;
         repaint();
     }
-
 
     private Point adjustPoint(Point p) {
         return new Point((int) ((p.x - offsetX) / scale), (int) ((p.y - offsetY) / scale));
@@ -252,16 +275,16 @@ public class DrawingArea extends JPanel {
             this.equipments = new ArrayList<>();
         }
 
-        public void addEquipment(String componentName, Point position, int width, int height) {
+        public void addEquipment(String componentName, Point position, int width, int height, int id) {
             if (width <= 0 || height <= 0) {
                 width = 60;
                 height = 60;
             }
-            equipments.add(new Equipment(componentName, new Point(position.x - x, position.y - y), width, height));
+            equipments.add(new Equipment(componentName, new Point(position.x - x, position.y - y), width, height, id));
         }
 
-        public void addEquipment(Equipment equipment, Point position) {
-            equipment.position = new Point(position.x - x, position.y - y);
+        public void addEquipment(Equipment equipment) {
+            equipment.position = new Point(equipment.position.x - x, equipment.position.y - y);
             equipments.add(equipment);
         }
 
@@ -296,12 +319,22 @@ public class DrawingArea extends JPanel {
         private String name;
         private Point position;
         private int width, height;
+        private int id;
 
-        public Equipment(String name, Point position, int width, int height) {
+        public Equipment(String name, Point position, int width, int height, int id) {
             this.name = name;
             this.position = position;
             this.width = width;
             this.height = height;
+            this.id = id;
+        }
+
+        public int getId() {
+            return id;
+        }
+
+        public void setId(int id) {
+            this.id = id;
         }
 
         public void move(int dx, int dy) {

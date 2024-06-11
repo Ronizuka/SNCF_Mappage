@@ -7,11 +7,7 @@ import java.awt.event.*;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.URL;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
+import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,12 +19,14 @@ public class Window {
     private Point selectedEquipmentPosition;
     private int selectedEquipmentWidth;
     private int selectedEquipmentHeight;
+    private int selectedEquipmentId;
     private List<JMenuItem> disabledMenuItems;
     private List<JButton> disabledButtons;
     private JButton selectedButton;
     private int currentAction;
     private MaterialManager materialManager;
-    private TrainManager trainManager; // Nouvelle instance de TrainManager
+    private TrainManager trainManager; 
+    private ContextMenuManager contextMenuManager;
 
     public Window() {
         initialize();
@@ -53,7 +51,6 @@ public class Window {
         menuItemNouveauPlan.addActionListener(e -> {
             BouttonManager.enableMenuItemsAndButtons(disabledMenuItems, disabledButtons);
 
-            // Appeler TrainManager pour créer un nouveau train avant de montrer NbChassis
             trainManager.creerTrain(new TrainManager.TrainCreationCallback() {
                 @Override
                 public void onTrainCreated() {
@@ -201,7 +198,21 @@ public class Window {
 
         frame.add(sidePanel, BorderLayout.WEST);
 
-        drawingArea = new DrawingArea();
+        contextMenuManager = new ContextMenuManager(new ContextMenuManager.ContextMenuListener() {
+            @Override
+            public void onInformationConnecteurs(int equipmentId) {
+                // Implémenter l'action pour "Informations connecteurs"
+                showConnectorInformation(equipmentId);
+            }
+
+            @Override
+            public void onCreerLiaison(int equipmentId) {
+                // Implémenter l'action pour "Créer une liaison"
+                JOptionPane.showMessageDialog(frame, "Créer une liaison pour l'équipement ID: " + equipmentId);
+            }
+        });
+
+        drawingArea = new DrawingArea(contextMenuManager);
         drawingArea.setCurrentAction(DrawingArea.ACTION_NONE);
         drawingArea.addMouseListener(new MouseAdapter() {
             @Override
@@ -215,11 +226,13 @@ public class Window {
                                 baie.removeEquipment(equipmentToRemove);
                             }
 
-                            baie.addEquipment(selectedEquipment, new Point(clickedPoint.x - selectedEquipmentWidth / 2, clickedPoint.y - selectedEquipmentHeight / 2), selectedEquipmentWidth, selectedEquipmentHeight);
+                            DrawingArea.Equipment newEquipment = drawingArea.new Equipment(selectedEquipment, new Point(clickedPoint.x - selectedEquipmentWidth / 2, clickedPoint.y - selectedEquipmentHeight / 2), selectedEquipmentWidth, selectedEquipmentHeight, selectedEquipmentId);
+                            baie.addEquipment(newEquipment);
                             selectedEquipment = null;
                             selectedEquipmentPosition = null;
                             selectedEquipmentWidth = 0;
                             selectedEquipmentHeight = 0;
+                            selectedEquipmentId = 0;  // Réinitialisez l'ID de l'équipement
                             drawingArea.repaint();
                             break;
                         }
@@ -268,7 +281,7 @@ public class Window {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
             if (connection != null) {
                 Statement statement = connection.createStatement();
-                ResultSet resultSet = statement.executeQuery("SELECT nomEquipt, longueur, hauteur FROM equipements");
+                ResultSet resultSet = statement.executeQuery("SELECT idEquipt, nomEquipt, longueur, hauteur FROM equipements");
                 List<String> equipementNames = new ArrayList<>();
                 while (resultSet.next()) {
                     equipementNames.add(resultSet.getString("nomEquipt"));
@@ -287,13 +300,15 @@ public class Window {
                     System.out.println("Equipement sélectionné : " + selectedEquipment);
                     connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
                     statement = connection.createStatement();
-                    resultSet = statement.executeQuery("SELECT longueur, hauteur FROM equipements WHERE nomEquipt = '" + selectedEquipment + "'");
+                    resultSet = statement.executeQuery("SELECT idEquipt, longueur, hauteur FROM equipements WHERE nomEquipt = '" + selectedEquipment + "'");
                     if (resultSet.next()) {
                         selectedEquipmentWidth = resultSet.getInt("longueur");
                         selectedEquipmentHeight = resultSet.getInt("hauteur");
+                        selectedEquipmentId = resultSet.getInt("idEquipt");
                         System.out.println("Longueur de l'équipement : " + selectedEquipmentWidth);
                         System.out.println("Hauteur de l'équipement : " + selectedEquipmentHeight);
-                        drawingArea.selectComponent(selectedEquipment, selectedEquipmentWidth, selectedEquipmentHeight);
+                        System.out.println("ID de l'équipement : " + selectedEquipmentId);
+                        drawingArea.selectComponent(selectedEquipment, selectedEquipmentWidth, selectedEquipmentHeight, selectedEquipmentId);
                     }
                     resultSet.close();
                     statement.close();
@@ -302,6 +317,34 @@ public class Window {
             }
         } catch (SQLException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void showConnectorInformation(int equipmentId) {
+        try {
+            Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
+            String query = "SELECT codeCon FROM connecteursequipt WHERE idEquipt = ?";
+            PreparedStatement statement = connection.prepareStatement(query);
+            statement.setInt(1, equipmentId);
+            ResultSet resultSet = statement.executeQuery();
+
+            List<String> connectors = new ArrayList<>();
+            while (resultSet.next()) {
+                connectors.add(resultSet.getString("codeCon"));
+            }
+
+            resultSet.close();
+            statement.close();
+            connection.close();
+
+            if (connectors.isEmpty()) {
+                JOptionPane.showMessageDialog(frame, "Cet équipement n'a pas de connecteurs.");
+            } else {
+                JOptionPane.showMessageDialog(frame, "Connecteurs: " + String.join(", ", connectors));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(frame, "Erreur lors de la récupération des connecteurs.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
 
