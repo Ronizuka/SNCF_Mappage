@@ -28,6 +28,7 @@ public class Window {
     private JButton selectedButton;
     private int currentAction;
     private MaterialManager materialManager;
+    private TrainManager trainManager; // Nouvelle instance de TrainManager
 
     public Window() {
         initialize();
@@ -51,12 +52,19 @@ public class Window {
         JMenuItem menuItemNouveauPlan = new JMenuItem("Nouveau plan");
         menuItemNouveauPlan.addActionListener(e -> {
             BouttonManager.enableMenuItemsAndButtons(disabledMenuItems, disabledButtons);
-            JFrame nbBaiesFrame = new JFrame("Nombre de Baies");
-            nbBaiesFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-            nbBaiesFrame.getContentPane().add(new NbBaies(this));
-            nbBaiesFrame.pack();
-            nbBaiesFrame.setLocationRelativeTo(null);
-            nbBaiesFrame.setVisible(true);
+
+            // Appeler TrainManager pour créer un nouveau train avant de montrer NbChassis
+            trainManager.creerTrain(new TrainManager.TrainCreationCallback() {
+                @Override
+                public void onTrainCreated() {
+                    JFrame nbChassisFrame = new JFrame("Nombre de Châssis");
+                    nbChassisFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+                    nbChassisFrame.getContentPane().add(new NbChassis(Window.this));
+                    nbChassisFrame.pack();
+                    nbChassisFrame.setLocationRelativeTo(null);
+                    nbChassisFrame.setVisible(true);
+                }
+            });
         });
         menuItemNouveauPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemNouveauPlan);
@@ -247,6 +255,7 @@ public class Window {
         BouttonManager.disableMenuItemsAndButtons(frame, disabledMenuItems, disabledButtons);
 
         materialManager = new MaterialManager(frame); // Initialize MaterialManager
+        trainManager = new TrainManager(frame); // Initialize TrainManager
     }
 
     public void addChassis(int nombreChassis, int largeurChassis, int hauteurChassis) {

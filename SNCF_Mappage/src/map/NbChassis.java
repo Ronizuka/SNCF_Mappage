@@ -4,14 +4,14 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
-public class NbBaies extends JPanel {
+public class NbChassis extends JPanel {
     private JSpinner spinnerNombreChassis;
     private JSpinner spinnerLargeurChassis;
     private JSpinner spinnerHauteurChassis;
     private JButton validerButton;
     private Window window;
 
-    public NbBaies(Window window) {
+    public NbChassis(Window window) {
         this.window = window;
         setLayout(new BorderLayout());
 
@@ -66,7 +66,7 @@ public class NbBaies extends JPanel {
                 int largeurChassis = (int) spinnerLargeurChassis.getValue();
                 int hauteurChassis = (int) spinnerHauteurChassis.getValue();
                 window.addChassis(nombreChassis, largeurChassis, hauteurChassis);
-                SwingUtilities.getWindowAncestor(NbBaies.this).dispose();
+                SwingUtilities.getWindowAncestor(NbChassis.this).dispose();
             }
         });
 
