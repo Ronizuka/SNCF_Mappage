@@ -225,14 +225,12 @@ public class Window {
         contextMenuManager = new ContextMenuManager(new ContextMenuManager.ContextMenuListener() {
             @Override
             public void onInformationConnecteurs(int equipmentId) {
-                // Implémenter l'action pour "Informations connecteurs"
                 showConnectorInformation(equipmentId);
             }
 
             @Override
             public void onCreerLiaison(int equipmentId) {
-                // Implémenter l'action pour "Créer une liaison"
-                JOptionPane.showMessageDialog(frame, "Créer une liaison pour l'équipement ID: " + equipmentId);
+                showCreateLiaisonPopup(equipmentId);
             }
         });
 
@@ -372,6 +370,156 @@ public class Window {
             JOptionPane.showMessageDialog(frame, "Erreur lors de la récupération des connecteurs.", "Erreur", JOptionPane.ERROR_MESSAGE);
         }
     }
+
+    private void showCreateLiaisonPopup(int equipmentId) {
+        try {
+            System.out.println("Looking for equipment with ID: " + equipmentId);
+            DrawingArea.Equipment targetEquipment = null;
+            for (DrawingArea.Baie baie : drawingArea.getBaies()) {
+                for (DrawingArea.Equipment equipment : baie.getEquipments()) {
+                    if (equipment.getId() == equipmentId) {
+                        targetEquipment = equipment;
+                        break;
+                    }
+                }
+            }
+
+            if (targetEquipment == null) {
+                System.out.println("Target equipment not found.");
+                JOptionPane.showMessageDialog(frame, "Erreur: Équipement non trouvé.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            System.out.println("Found target equipment: " + targetEquipment.getName());
+
+            List<String> targetConnectors = new ArrayList<>();
+            List<EquipmentWithConnectors> equipmentsWithConnectors = new ArrayList<>();
+
+            try (Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "")) {
+                // Récupérer les connecteurs de l'équipement cible
+                String connectorQuery = "SELECT codeCon FROM connecteursequipt WHERE idEquipt = ?";
+                PreparedStatement statement = connection.prepareStatement(connectorQuery);
+                statement.setInt(1, targetEquipment.getId());
+                ResultSet connectorResultSet = statement.executeQuery();
+
+                while (connectorResultSet.next()) {
+                    targetConnectors.add(connectorResultSet.getString("codeCon"));
+                }
+
+                connectorResultSet.close();
+                statement.close();
+
+                // Récupérer les équipements avec leurs connecteurs
+                for (DrawingArea.Baie baie : drawingArea.getBaies()) {
+                    for (DrawingArea.Equipment equipment : baie.getEquipments()) {
+                        if (equipment.getId() != targetEquipment.getId()) {
+                            List<String> connectors = new ArrayList<>();
+                            connectorQuery = "SELECT codeCon FROM connecteursequipt WHERE idEquipt = ?";
+                            statement = connection.prepareStatement(connectorQuery);
+                            statement.setInt(1, equipment.getId());
+                            connectorResultSet = statement.executeQuery();
+
+                            while (connectorResultSet.next()) {
+                                connectors.add(connectorResultSet.getString("codeCon"));
+                            }
+
+                            if (!connectors.isEmpty()) {
+                                equipmentsWithConnectors.add(new EquipmentWithConnectors(equipment, connectors));
+                            }
+
+                            connectorResultSet.close();
+                            statement.close();
+                        }
+                    }
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(frame, "Erreur lors de la récupération des connecteurs.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            // Création de la fenêtre contextuelle
+            JFrame popupFrame = new JFrame("Créer une liaison");
+            popupFrame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+            popupFrame.setLayout(new GridBagLayout());
+            GridBagConstraints gbc = new GridBagConstraints();
+            gbc.gridx = 0;
+            gbc.gridy = 0;
+            gbc.insets = new Insets(10, 10, 10, 10);
+
+            // Connecteurs de l'équipement cible
+            JLabel labelTargetConnector = new JLabel("Lier le connecteur ");
+            popupFrame.add(labelTargetConnector, gbc);
+
+            gbc.gridx++;
+            JComboBox<String> targetConnectorDropdown = new JComboBox<>(targetConnectors.toArray(new String[0]));
+            popupFrame.add(targetConnectorDropdown, gbc);
+
+            // Texte intermédiaire
+            gbc.gridx++;
+            JLabel labelWith = new JLabel(" avec l'équipement ");
+            popupFrame.add(labelWith, gbc);
+
+            // Connecteurs des autres équipements
+            gbc.gridx++;
+            JComboBox<String> equipmentDropdown = new JComboBox<>(equipmentsWithConnectors.stream().map(e -> e.equipment.getName()).toArray(String[]::new));
+            popupFrame.add(equipmentDropdown, gbc);
+
+            gbc.gridx++;
+            JLabel labelAndConnector = new JLabel(" et ce connecteur ");
+            popupFrame.add(labelAndConnector, gbc);
+
+            gbc.gridx++;
+            JComboBox<String> otherConnectorDropdown = new JComboBox<>();
+            popupFrame.add(otherConnectorDropdown, gbc);
+
+            equipmentDropdown.addActionListener(e -> {
+                int selectedIndex = equipmentDropdown.getSelectedIndex();
+                if (selectedIndex >= 0) {
+                    EquipmentWithConnectors selectedEquipment = equipmentsWithConnectors.get(selectedIndex);
+                    otherConnectorDropdown.setModel(new DefaultComboBoxModel<>(selectedEquipment.connectors.toArray(new String[0])));
+                }
+            });
+
+            if (!equipmentsWithConnectors.isEmpty()) {
+                equipmentDropdown.setSelectedIndex(0);
+            }
+
+            // Bouton pour créer la liaison
+            gbc.gridx++;
+            JButton createLinkButton = new JButton("Créer la liaison");
+            createLinkButton.addActionListener(e -> {
+                String selectedTargetConnector = (String) targetConnectorDropdown.getSelectedItem();
+                String selectedOtherConnector = (String) otherConnectorDropdown.getSelectedItem();
+                if (selectedTargetConnector != null && selectedOtherConnector != null) {
+                    System.out.println("Creating link between " + selectedTargetConnector + " and " + selectedOtherConnector);
+                    // Ajoutez ici le code pour enregistrer la liaison dans la base de données
+                    popupFrame.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(popupFrame, "Veuillez sélectionner les connecteurs à lier.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                }
+            });
+            popupFrame.add(createLinkButton, gbc);
+
+            popupFrame.pack();
+            popupFrame.setLocationRelativeTo(frame);
+            popupFrame.setVisible(true);
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(frame, "Erreur lors de la récupération des équipements.", "Erreur", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private static class EquipmentWithConnectors {
+        DrawingArea.Equipment equipment;
+        List<String> connectors;
+
+        EquipmentWithConnectors(DrawingArea.Equipment equipment, List<String> connectors) {
+            this.equipment = equipment;
+            this.connectors = connectors;
+        }
+    }
+
 
     private Point adjustPoint(Point p) {
         return new Point((int) ((p.x - drawingArea.getOffsetX()) / drawingArea.getScale()), (int) ((p.y - drawingArea.getOffsetY()) / drawingArea.getScale()));

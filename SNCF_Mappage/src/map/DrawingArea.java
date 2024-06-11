@@ -263,6 +263,24 @@ public class DrawingArea extends JPanel {
         repaint();
     }
 
+    public List<Equipment> getNearbyEquipments(Equipment targetEquipment) {
+        List<Equipment> nearbyEquipments = new ArrayList<>();
+        System.out.println("Searching for all equipments...");
+        for (Baie baie : baies) {
+            for (Equipment equipment : baie.getEquipments()) {
+                System.out.println("Checking equipment: " + equipment.getName());
+                if (!equipment.equals(targetEquipment)) {
+                    nearbyEquipments.add(equipment);
+                    System.out.println("Added equipment: " + equipment.getName() + " to nearby equipments");
+                }
+            }
+        }
+        return nearbyEquipments;
+    }
+
+ 
+
+
     class Baie {
         private int x, y, width, height;
         private List<Equipment> equipments;
@@ -313,6 +331,10 @@ public class DrawingArea extends JPanel {
                 equipment.draw(g2d, x, y);
             }
         }
+
+        public List<Equipment> getEquipments() {  // Ajouter ce getter
+            return equipments;
+        }
     }
 
     class Equipment {
@@ -331,6 +353,10 @@ public class DrawingArea extends JPanel {
 
         public int getId() {
             return id;
+        }
+
+        public String getName() {  // Ajouter ce getter
+            return name;
         }
 
         public void setId(int id) {
