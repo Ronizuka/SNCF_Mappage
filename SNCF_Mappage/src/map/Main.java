@@ -1,4 +1,5 @@
 package map;
+
 import map.Login.LoginSuccessListener;
 import javax.swing.*;
 import java.sql.*;
@@ -12,7 +13,7 @@ public class Main {
                 Login loginWindow = new Login();
                 loginWindow.addLoginSuccessListener(new LoginSuccessListener() {
                     @Override
-                    public void onLoginSuccess() {
+                    public void onLoginSuccess(int userRights) {
                         // Une fois que l'utilisateur est connecté, fermer la fenêtre de connexion
                         JFrame frame = (JFrame) SwingUtilities.getWindowAncestor(loginWindow);
                         if (frame != null) {
@@ -20,7 +21,7 @@ public class Main {
                         }
 
                         // Lancer l'application principale
-                        Window window = new Window();
+                        Window window = new Window(userRights);
                         window.launch();
                     }
                 });
@@ -30,7 +31,7 @@ public class Main {
                 frame.pack();
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
-                
+
                 // Connexion à la base de données
                 try {
                     Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");

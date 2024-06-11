@@ -28,8 +28,11 @@ public class Window {
     private JButton selectedButton;
     private int currentAction;
     private MaterialManager materialManager;
+    private UserManager userManager;
+    private int userRights;
 
-    public Window() {
+    public Window(int userRights) {
+        this.userRights = userRights;
         initialize();
     }
 
@@ -113,6 +116,29 @@ public class Window {
             materialManager.supprimerMateriel();
         });
         menuMateriel.add(menuItemSupprimerMateriel);
+
+        if (userRights == 2) {  // Only add the "Utilisateurs" menu if the user has admin rights
+            JMenu menuUtilisateur = new JMenu("Utilisateurs");
+            menuBar.add(menuUtilisateur);
+
+            JMenuItem menuItemCreerUtilisateur = new JMenuItem("Créer un utilisateur");
+            menuItemCreerUtilisateur.addActionListener(e -> {
+                userManager.creerUtilisateur();
+            });
+            menuUtilisateur.add(menuItemCreerUtilisateur);
+
+            JMenuItem menuItemModifierUtilisateur = new JMenuItem("Modifier un utilisateur");
+            menuItemModifierUtilisateur.addActionListener(e -> {
+                userManager.modifierUtilisateur();
+            });
+            menuUtilisateur.add(menuItemModifierUtilisateur);
+
+            JMenuItem menuItemSupprimerUtilisateur = new JMenuItem("Supprimer un utilisateur");
+            menuItemSupprimerUtilisateur.addActionListener(e -> {
+                userManager.supprimerUtilisateur();
+            });
+            menuUtilisateur.add(menuItemSupprimerUtilisateur);
+        }
 
         frame.getAccessibleContext().setAccessibleDescription("SNCF Mappage");
 
@@ -246,7 +272,8 @@ public class Window {
         disabledMenuItems = new ArrayList<>();
         BouttonManager.disableMenuItemsAndButtons(frame, disabledMenuItems, disabledButtons);
 
-        materialManager = new MaterialManager(frame); // Initialize MaterialManager
+        materialManager = new MaterialManager(frame);
+        userManager = new UserManager(frame);
     }
 
     public void addBaies(int nombreBaies) {
@@ -315,7 +342,7 @@ public class Window {
         Login loginWindow = new Login();
         loginWindow.addLoginSuccessListener(new Login.LoginSuccessListener() {
             @Override
-            public void onLoginSuccess() {
+            public void onLoginSuccess(int userRights) {
                 JFrame frame = new JFrame("SNCF Mappage - Connexion");
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.getContentPane().add(loginWindow);
@@ -323,7 +350,7 @@ public class Window {
                 frame.setLocationRelativeTo(null);
                 frame.setVisible(true);
 
-                Window window = new Window();
+                Window window = new Window(userRights);
                 window.launch();
             }
         });

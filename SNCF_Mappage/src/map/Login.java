@@ -44,10 +44,11 @@ public class Login extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 String email = usernameField.getText();
                 String password = new String(passwordField.getPassword());
-                if (authenticate(email, password)) {
+                int userRights = authenticate(email, password);
+                if (userRights >= 0) {
                     // Connexion réussie
                     JOptionPane.showMessageDialog(Login.this, "Connexion réussie!");
-                    notifyLoginSuccessListeners();
+                    notifyLoginSuccessListeners(userRights);
                 } else {
                     // Afficher un message d'erreur
                     JOptionPane.showMessageDialog(Login.this, "Adresse mail ou mot de passe incorrect.", "Erreur de Connexion", JOptionPane.ERROR_MESSAGE);
@@ -59,17 +60,17 @@ public class Login extends JPanel {
         add(buttonPanel, BorderLayout.SOUTH);
     }
 
-    private boolean authenticate(String email, String password) {
-        boolean isAuthenticated = false;
+    private int authenticate(String email, String password) {
+        int userRights = -1;
         try {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
-            String query = "SELECT * FROM users WHERE mail = ? AND pwd = ?";
+            String query = "SELECT droits FROM users WHERE mail = ? AND pwd = ?";
             PreparedStatement statement = connection.prepareStatement(query);
             statement.setString(1, email);
             statement.setString(2, password);
             ResultSet resultSet = statement.executeQuery();
             if (resultSet.next()) {
-                isAuthenticated = true;
+                userRights = resultSet.getInt("droits");
             }
             resultSet.close();
             statement.close();
@@ -77,21 +78,21 @@ public class Login extends JPanel {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return isAuthenticated;
+        return userRights;
     }
 
     public void addLoginSuccessListener(LoginSuccessListener listener) {
         loginSuccessListeners.add(listener);
     }
 
-    private void notifyLoginSuccessListeners() {
+    private void notifyLoginSuccessListeners(int userRights) {
         for (LoginSuccessListener listener : loginSuccessListeners) {
-            listener.onLoginSuccess();
+            listener.onLoginSuccess(userRights);
         }
     }
 
     // Interface pour écouter les événements de connexion réussie
     public interface LoginSuccessListener {
-        void onLoginSuccess();
+        void onLoginSuccess(int userRights);
     }
 }
