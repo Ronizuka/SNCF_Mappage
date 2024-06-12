@@ -4,8 +4,24 @@ import map.Login.LoginSuccessListener;
 import javax.swing.*;
 import java.sql.*;
 
+/**
+ * La classe principale qui lance l'application.
+ */
 public class Main {
 
+    /**
+     * Constructeur par défaut de la classe Main.
+     * Ce constructeur est utilisé pour lancer l'application.
+     */
+    public Main() {
+        // Default constructor
+    }
+
+    /**
+     * Le point d'entrée principal de l'application.
+     * 
+     * @param args les arguments de la ligne de commande
+     */
     public static void main(String[] args) {
         // Créer et afficher la fenêtre de connexion au démarrage de l'application
         SwingUtilities.invokeLater(new Runnable() {

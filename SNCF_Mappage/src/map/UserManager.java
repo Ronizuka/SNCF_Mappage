@@ -8,14 +8,28 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * La classe UserManager gère les opérations CRUD pour les utilisateurs dans une application Swing.
+ */
 public class UserManager {
 
+    /**
+     * La fenêtre principale de l'application Swing.
+     */
     private JFrame frame;
 
+    /**
+     * Constructeur de la classe UserManager.
+     *
+     * @param frame La fenêtre principale de l'application Swing.
+     */
     public UserManager(JFrame frame) {
         this.frame = frame;
     }
 
+    /**
+     * Crée un nouvel utilisateur et l'ajoute à la base de données.
+     */
     public void creerUtilisateur() {
         JTextField mailField = new JTextField();
         JTextField nomField = new JTextField();
@@ -91,6 +105,9 @@ public class UserManager {
         }
     }
 
+    /**
+     * Modifie les informations d'un utilisateur existant.
+     */
     public void modifierUtilisateur() {
         JComboBox<String> dropdown = new JComboBox<>();
         try {
@@ -120,6 +137,11 @@ public class UserManager {
         }
     }
 
+    /**
+     * Modifie les détails d'un utilisateur spécifique.
+     *
+     * @param mail L'adresse mail de l'utilisateur à modifier.
+     */
     private void modifierUtilisateurDetail(String mail) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
@@ -208,6 +230,9 @@ public class UserManager {
         }
     }
 
+    /**
+     * Supprime un utilisateur existant.
+     */
     public void supprimerUtilisateur() {
         JComboBox<String> dropdown = new JComboBox<>();
         try {
@@ -237,6 +262,11 @@ public class UserManager {
         }
     }
 
+    /**
+     * Supprime un utilisateur spécifique de la base de données.
+     *
+     * @param mail L'adresse mail de l'utilisateur à supprimer.
+     */
     private void supprimerUtilisateurDetail(String mail) {
         if (mail != null && !mail.trim().isEmpty()) {
             try {

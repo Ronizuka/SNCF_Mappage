@@ -8,14 +8,28 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * Cette classe gère les opérations de création, modification et suppression des matériels.
+ */
 public class MaterialManager {
 
+    /**
+     * La fenêtre principale de l'application.
+     */
     private JFrame frame;
 
+    /**
+     * Constructeur de la classe MaterialManager.
+     *
+     * @param frame la fenêtre principale de l'application
+     */
     public MaterialManager(JFrame frame) {
         this.frame = frame;
     }
 
+    /**
+     * Crée un nouveau matériel et l'ajoute à la base de données.
+     */
     public void creerMateriel() {
         JTextField nomField = new JTextField();
         JTextField longueurField = createNumberField();
@@ -134,6 +148,9 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour sélectionner un matériel à modifier.
+     */
     public void modifierMateriel() {
         JComboBox<String> dropdown = new JComboBox<>();
         try {
@@ -163,6 +180,11 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Modifie les détails d'un matériel sélectionné.
+     * 
+     * @param nom le nom du matériel à modifier
+     */
     private void modifierMaterielDetail(String nom) {
         try {
             Connection connection = DriverManager.getConnection("jdbc:mysql://localhost/test", "root", "");
@@ -294,6 +316,9 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Ouvre une boîte de dialogue pour sélectionner un matériel à supprimer.
+     */
     public void supprimerMateriel() {
         JComboBox<String> dropdown = new JComboBox<>();
         try {
@@ -323,6 +348,11 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Supprime un matériel sélectionné de la base de données.
+     * 
+     * @param nom le nom du matériel à supprimer
+     */
     private void supprimerMaterielDetail(String nom) {
         if (nom != null && !nom.trim().isEmpty()) {
             try {
@@ -346,43 +376,86 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Crée un champ de texte pour entrer des nombres entiers avec un filtre pour n'accepter que les chiffres.
+     * 
+     * @return un JTextField configuré pour les nombres entiers
+     */
     private JTextField createNumberField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pré-rempli avec une valeur pour entrer des nombres entiers avec un filtre pour n'accepter que les chiffres.
+     * 
+     * @param value la valeur initiale du champ de texte
+     * @return un JTextField configuré pour les nombres entiers
+     */
     private JTextField createNumberField(int value) {
         JTextField field = new JTextField(String.valueOf(value));
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pour entrer des nombres flottants avec un filtre pour n'accepter que les chiffres et un point décimal.
+     *
+     * @return un JTextField configuré pour les nombres flottants
+     */
     private JTextField createFloatField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pré-rempli avec une valeur pour entrer des nombres flottants avec un filtre pour n'accepter que les chiffres et un point décimal.
+     *
+     * @param value la valeur initiale du champ de texte
+     * @return un JTextField configuré pour les nombres flottants
+     */
     private JTextField createFloatField(float value) {
         JTextField field = new JTextField(String.valueOf(value));
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pour entrer des nombres doubles avec un filtre pour n'accepter que les chiffres et un point décimal.
+     *
+     * @return un JTextField configuré pour les nombres doubles
+     */
     private JTextField createDoubleField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pré-rempli avec une valeur pour entrer des nombres doubles avec un filtre pour n'accepter que les chiffres et un point décimal.
+     *
+     * @param value la valeur initiale du champ de texte
+     * @return un JTextField configuré pour les nombres doubles
+     */
     private JTextField createDoubleField(double value) {
         JTextField field = new JTextField(String.valueOf(value));
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new DoubleFilter());
         return field;
     }
 
+    /**
+     * Filtre pour n'accepter que les chiffres dans un champ de texte.
+     */
     private class NumberFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de la classe NumberFilter.
+         */
+        public NumberFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d*")) {
@@ -398,7 +471,17 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Filtre pour n'accepter que les chiffres et un point décimal dans un champ de texte pour les nombres flottants.
+     */
     private class FloatFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de la classe FloatFilter.
+         */
+        public FloatFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d*\\.?\\d*")) {
@@ -414,7 +497,17 @@ public class MaterialManager {
         }
     }
 
+    /**
+     * Filtre pour n'accepter que les chiffres et un point décimal dans un champ de texte pour les nombres doubles.
+     */
     private class DoubleFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de la classe DoubleFilter.
+         */
+        public DoubleFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d*\\.?\\d*")) {

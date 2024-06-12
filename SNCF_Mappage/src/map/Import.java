@@ -14,8 +14,26 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.List;
 
+/**
+ * Cette classe gère l'importation et la sauvegarde des plans en format JSON.
+ */
 public class Import {
 
+    /**
+     * Constructeur par défaut de la classe Import.
+     * 
+     * Ce constructeur est implicite et n'effectue aucune opération.
+     */
+    public Import() {
+        // Constructeur par défaut
+    }
+
+    /**
+     * Sauvegarde le plan actuel dans un fichier JSON.
+     * 
+     * @param frame la fenêtre principale de l'application
+     * @param baies la liste des baies à sauvegarder
+     */
     public static void savePlan(JFrame frame, List<DrawingArea.Baie> baies) {
         FileDialog fileDialog = new FileDialog(frame, "Sauvegarder le plan", FileDialog.SAVE);
         fileDialog.setFile("*.json");
@@ -42,6 +60,14 @@ public class Import {
         }
     }
 
+    /**
+     * Charge un plan à partir d'un fichier JSON et l'affiche dans la DrawingArea.
+     * 
+     * @param frame la fenêtre principale de l'application
+     * @param drawingArea la zone de dessin où afficher le plan importé
+     * @param disabledMenuItems la liste des éléments de menu désactivés
+     * @param disabledButtons la liste des boutons désactivés
+     */
     public static void loadPlan(JFrame frame, DrawingArea drawingArea, List<JMenuItem> disabledMenuItems, List<JButton> disabledButtons) {
         FileDialog fileDialog = new FileDialog(frame, "Importer un plan", FileDialog.LOAD);
         fileDialog.setFile("*.json");

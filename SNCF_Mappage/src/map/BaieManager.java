@@ -11,18 +11,40 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Date;
 
+/**
+ * Classe qui gère les baies.
+ */
 public class BaieManager {
 
+    /**
+     * La fenêtre principale de l'application.
+     */
     private JFrame frame;
 
+    /**
+     * Constructeur de la classe BaieManager.
+     *
+     * @param frame la fenêtre principale de l'application
+     */
     public BaieManager(JFrame frame) {
         this.frame = frame;
     }
 
+    /**
+     * Interface pour gérer les callbacks de création de Baie.
+     */
     public interface TrainCreationCallback {
+        /**
+         * Méthode appelée lorsque la baie est créée.
+         */
         void onTrainCreated();
     }
 
+    /**
+     * Crée une nouvelle Baie avec les informations fournies par l'utilisateur.
+     *
+     * @param callback le callback appelé après la création de la baie
+     */
     public void creerTrain(TrainCreationCallback callback) {
         JTextField nomField = new JTextField();
         JTextField budgetField = createFloatField();
@@ -116,8 +138,8 @@ public class BaieManager {
                 statement.close();
                 connection.close();
 
-                JOptionPane.showMessageDialog(frame, "Baie créé avec succès.");
-                callback.onTrainCreated(); // Appeler le callback ici
+                JOptionPane.showMessageDialog(frame, "Baie créée avec succès.");
+                callback.onTrainCreated();
             } catch (SQLException e) {
                 e.printStackTrace();
                 JOptionPane.showMessageDialog(frame, "Erreur lors de la création de la Baie.", "Erreur", JOptionPane.ERROR_MESSAGE);
@@ -125,25 +147,50 @@ public class BaieManager {
         }
     }
 
+    /**
+     * Crée un champ de texte pour les nombres.
+     *
+     * @return un champ de texte pour les nombres
+     */
     private JTextField createNumberField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new NumberFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pour les nombres à virgule flottante.
+     *
+     * @return un champ de texte pour les nombres à virgule flottante
+     */
     private JTextField createFloatField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new FloatFilter());
         return field;
     }
 
+    /**
+     * Crée un champ de texte pour les dates.
+     *
+     * @return un champ de texte pour les dates
+     */
     private JTextField createDateField() {
         JTextField field = new JTextField();
         ((AbstractDocument) field.getDocument()).setDocumentFilter(new DateFilter());
         return field;
     }
 
+    /**
+     * Filtre pour les nombres dans les documents.
+     */
     private class NumberFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de NumberFilter.
+         */
+        public NumberFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d*")) {
@@ -159,7 +206,17 @@ public class BaieManager {
         }
     }
 
+    /**
+     * Filtre pour les nombres à virgule flottante dans les documents.
+     */
     private class FloatFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de FloatFilter.
+         */
+        public FloatFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d*\\.?\\d*")) {
@@ -175,7 +232,17 @@ public class BaieManager {
         }
     }
 
+    /**
+     * Filtre pour les dates dans les documents.
+     */
     private class DateFilter extends DocumentFilter {
+        /**
+         * Constructeur par défaut de DateFilter.
+         */
+        public DateFilter() {
+            super();
+        }
+
         @Override
         public void insertString(FilterBypass fb, int offset, String string, javax.swing.text.AttributeSet attr) throws javax.swing.text.BadLocationException {
             if (string.matches("\\d{0,4}-?\\d{0,2}-?\\d{0,2}")) {

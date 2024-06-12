@@ -69,7 +69,7 @@ public class Window {
         menuItemNouveauPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_N, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemNouveauPlan);
 
-        JMenuItem menuItemImporterPlan = new JMenuItem("Importer plan");
+        JMenuItem menuItemImporterPlan = new JMenuItem("Ouvrir plan");
         menuItemImporterPlan.addActionListener(e -> Import.loadPlan(frame, drawingArea, disabledMenuItems, disabledButtons));
         menuItemImporterPlan.setAccelerator(KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.Event.CTRL_MASK));
         menuFichier.add(menuItemImporterPlan);
@@ -155,7 +155,7 @@ public class Window {
         gbc.insets = new Insets(5, 5, 5, 5);
 
         disabledButtons = new ArrayList<>();
-        for (int i = 0; i < 6; i++) {
+        for (int i = 0; i < 5; i++) {
             gbc.gridy = i;
             JButton button = new JButton();
 
@@ -163,10 +163,10 @@ public class Window {
                 URL imageUrl = null;
                 switch (i) {
                     case 0:
-                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_recule.png?raw=true");
+                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_avance.png?raw=true");
                         break;
                     case 1:
-                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_avance.png?raw=true");
+                    	imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/fleche_recule.png?raw=true");
                         break;
                     case 2:
                         imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/souris.png?raw=true");
@@ -175,9 +175,6 @@ public class Window {
                         imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/puce-electronique.png?raw=true");
                         break;
                     case 4:
-                        imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/cable.png?raw=true");
-                        break;
-                    case 5:
                         imageUrl = new URL("https://github.com/Ronizuka/SNCF_Mappage/blob/Graphique/SNCF_Mappage/Icon/croix.png?raw=true");
                         break;
                 }
@@ -205,7 +202,7 @@ public class Window {
                     } else if (index == 3) {
                         showDropdown();
                         currentAction = DrawingArea.ACTION_NONE;
-                    } else if (index == 5) {
+                    } else if (index == 4) {
                         currentAction = DrawingArea.ACTION_DELETE;
                         drawingArea.setCurrentAction(DrawingArea.ACTION_DELETE);
                     } else {

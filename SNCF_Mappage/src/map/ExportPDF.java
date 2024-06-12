@@ -13,8 +13,26 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
+/**
+ * Cette classe gère l'exportation du plan en format PDF.
+ */
 public class ExportPDF {
 
+    /**
+     * Constructeur par défaut de la classe ExportPDF.
+     * 
+     * Ce constructeur est implicite et n'effectue aucune opération.
+     */
+    public ExportPDF() {
+        // Constructeur par défaut
+    }
+
+    /**
+     * Exporte le plan affiché dans la DrawingArea en format PDF.
+     * 
+     * @param frame la fenêtre principale de l'application
+     * @param drawingArea la zone de dessin contenant le plan à exporter
+     */
     public static void exportPlanToPDF(JFrame frame, DrawingArea drawingArea) {
         FileDialog fileDialog = new FileDialog(frame, "Choisir un fichier pour enregistrer le PDF", FileDialog.SAVE);
         fileDialog.setFile("*.pdf");
@@ -44,7 +62,15 @@ public class ExportPDF {
         }
     }
 
-    private static void drawPlanToPDF(Document document, PdfWriter writer, DrawingArea drawingArea) {
+    /**
+     * Dessine le plan de la DrawingArea dans le document PDF.
+     * 
+     * @param document le document PDF dans lequel dessiner
+     * @param writer l'objet PdfWriter pour le document
+     * @param drawingArea la zone de dessin contenant le plan à dessiner
+     * @throws DocumentException si une erreur survient lors de l'ajout du contenu au document PDF
+     */
+    private static void drawPlanToPDF(Document document, PdfWriter writer, DrawingArea drawingArea) throws DocumentException {
         PdfContentByte cb = writer.getDirectContent();
         PdfTemplate template = cb.createTemplate(document.getPageSize().getWidth(), document.getPageSize().getHeight());
         Graphics2D g2d = template.createGraphics(template.getWidth(), template.getHeight());

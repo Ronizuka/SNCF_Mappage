@@ -4,13 +4,40 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
 
+/**
+ * Cette classe représente un panneau permettant de sélectionner le nombre, la largeur et la hauteur des châssis.
+ */
 public class NbChassis extends JPanel {
+    /**
+     * Spinner pour sélectionner le nombre de châssis.
+     */
     private JSpinner spinnerNombreChassis;
+
+    /**
+     * Spinner pour sélectionner la largeur des châssis.
+     */
     private JSpinner spinnerLargeurChassis;
+
+    /**
+     * Spinner pour sélectionner la hauteur des châssis.
+     */
     private JSpinner spinnerHauteurChassis;
+
+    /**
+     * Bouton pour valider la sélection.
+     */
     private JButton validerButton;
+
+    /**
+     * Référence à la fenêtre principale de l'application.
+     */
     private Window window;
 
+    /**
+     * Constructeur de la classe NbChassis.
+     *
+     * @param window la fenêtre principale de l'application
+     */
     public NbChassis(Window window) {
         this.window = window;
         setLayout(new BorderLayout());
@@ -61,6 +88,7 @@ public class NbChassis extends JPanel {
         // Création du bouton Valider
         validerButton = new JButton("Valider");
         validerButton.addActionListener(new ActionListener() {
+            @Override
             public void actionPerformed(ActionEvent e) {
                 int nombreChassis = (int) spinnerNombreChassis.getValue();
                 int largeurChassis = (int) spinnerLargeurChassis.getValue();

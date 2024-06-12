@@ -5,7 +5,8 @@ import java.awt.*;
 public class Equipement {
     private String name;
     private Point position;
-    private int width, height;
+    private int width;
+    private int height;
     private int id;
 
     public Equipement(String name, Point position, int width, int height, int id) {
@@ -22,6 +23,10 @@ public class Equipement {
 
     public String getName() {
         return name;
+    }
+
+    public Point getCenter() {
+        return new Point(position.x + width / 2, position.y + height / 2);
     }
 
     public void setId(int id) {
@@ -69,7 +74,6 @@ public class Equipement {
     }
 
     public Point getConnectorPosition(String connector) {
-        // Pour simplifier, nous plaçons les connecteurs au milieu des bords des équipements
         switch (connector) {
             case "top":
                 return new Point(position.x + width / 2, position.y);
@@ -80,7 +84,7 @@ public class Equipement {
             case "right":
                 return new Point(position.x + width, position.y + height / 2);
             default:
-                return new Point(position.x + width / 2, position.y + height / 2); // centre
+                return new Point(position.x + width / 2, position.y + height / 2);
         }
     }
 }
