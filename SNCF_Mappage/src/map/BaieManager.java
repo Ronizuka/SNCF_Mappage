@@ -11,11 +11,11 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Date;
 
-public class TrainManager {
+public class BaieManager {
 
     private JFrame frame;
 
-    public TrainManager(JFrame frame) {
+    public BaieManager(JFrame frame) {
         this.frame = frame;
     }
 
@@ -60,7 +60,7 @@ public class TrainManager {
         panel.add(new JLabel("Code Activité:"));
         panel.add(codeActiviteField);
 
-        int result = JOptionPane.showConfirmDialog(frame, panel, "Créer un nouveau train", JOptionPane.OK_CANCEL_OPTION);
+        int result = JOptionPane.showConfirmDialog(frame, panel, "Créer une nouvelle Baie", JOptionPane.OK_CANCEL_OPTION);
         if (result == JOptionPane.OK_OPTION) {
             if (nomField.getText().isEmpty() || budgetField.getText().isEmpty() ||
                     debutTravauxField.getText().isEmpty() || finTravauxField.getText().isEmpty() || nbRisquesField.getText().isEmpty() ||
@@ -91,7 +91,7 @@ public class TrainManager {
                 ResultSet resultSet = checkStatement.executeQuery();
                 resultSet.next();
                 if (resultSet.getInt(1) > 0) {
-                    JOptionPane.showMessageDialog(frame, "Un train avec ce nom existe déjà.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                    JOptionPane.showMessageDialog(frame, "Une Baie avec ce nom existe déjà.", "Erreur", JOptionPane.ERROR_MESSAGE);
                     resultSet.close();
                     checkStatement.close();
                     return;
@@ -116,11 +116,11 @@ public class TrainManager {
                 statement.close();
                 connection.close();
 
-                JOptionPane.showMessageDialog(frame, "Train créé avec succès.");
+                JOptionPane.showMessageDialog(frame, "Baie créé avec succès.");
                 callback.onTrainCreated(); // Appeler le callback ici
             } catch (SQLException e) {
                 e.printStackTrace();
-                JOptionPane.showMessageDialog(frame, "Erreur lors de la création du train.", "Erreur", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Erreur lors de la création de la Baie.", "Erreur", JOptionPane.ERROR_MESSAGE);
             }
         }
     }

@@ -25,7 +25,7 @@ public class Window {
     private JButton selectedButton;
     private int currentAction;
     private MaterialManager materialManager;
-    private TrainManager trainManager; 
+    private BaieManager trainManager; 
     private ContextMenuManager contextMenuManager;
     private UserManager userManager;
     private int userRights;
@@ -54,7 +54,7 @@ public class Window {
         menuItemNouveauPlan.addActionListener(e -> {
             BouttonManager.enableMenuItemsAndButtons(disabledMenuItems, disabledButtons);
 
-            trainManager.creerTrain(new TrainManager.TrainCreationCallback() {
+            trainManager.creerTrain(new BaieManager.TrainCreationCallback() {
                 @Override
                 public void onTrainCreated() {
                     JFrame nbChassisFrame = new JFrame("Nombre de Châssis");
@@ -291,7 +291,7 @@ public class Window {
 
         materialManager = new MaterialManager(frame);
         userManager = new UserManager(frame);
-        trainManager = new TrainManager(frame); // Initialize TrainManager
+        trainManager = new BaieManager(frame); // Initialize TrainManager
     }
 
     public void addChassis(int nombreChassis, int largeurChassis, int hauteurChassis) {
